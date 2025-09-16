@@ -18,6 +18,7 @@ import Cart from './pages/User/Cart';
 import Checkout from './pages/User/Checkout';
 import OrderConfirmation from './pages/User/OrderConfirmation';
 import Orders from './pages/User/Orders';
+import Profile from './pages/User/Profile'; // <-- Import Profile (case matches file)
 
 // Admin Pages
 import Dashboard from './pages/Admin/Dashboard';
@@ -76,11 +77,11 @@ const AppContent: React.FC = () => {
             {/* Public Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            
+
             {/* User Routes */}
             <Route path="/" element={<Home />} />
             <Route path="/products/:id" element={<ProductDetails />} />
-            
+
             {/* Protected User Routes */}
             <Route path="/cart" element={
               <ProtectedRoute>
@@ -104,10 +105,10 @@ const AppContent: React.FC = () => {
             } />
             <Route path="/profile" element={
               <ProtectedRoute>
-                <Orders />
+                <Profile /> {/* <-- Fixed */}
               </ProtectedRoute>
             } />
-            
+
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </>

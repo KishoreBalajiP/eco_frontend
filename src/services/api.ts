@@ -80,8 +80,9 @@ export const cartAPI = {
 
 // Orders APIs
 export const ordersAPI = {
+  // Fixed: POST to /orders instead of /orders/create
   createOrder: async (currency = 'INR') => {
-    const response = await api.post('/orders/create', { currency });
+    const response = await api.post('/orders', { currency });
     return response.data;
   },
   
