@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Package, ShoppingBag, Users, DollarSign } from 'lucide-react';
+import { Package, ShoppingBag, Users, IndianRupee } from 'lucide-react';
 import { adminAPI, productsAPI } from '../../services/api';
+
 
 interface Stats {
   totalProducts: number;
@@ -30,8 +31,12 @@ const Dashboard: React.FC = () => {
         const products = productsResponse.products || [];
         const orders = ordersResponse.orders || [];
         const users = usersResponse.users || [];
-        
-        const revenue = orders.reduce((sum: number, order: any) => sum + order.total, 0);
+
+        // ✅ Convert order.total to number before summing
+        const revenue = orders.reduce(
+          (sum: number, order: any) => sum + Number(order.total),
+          0
+        );
 
         setStats({
           totalProducts: products.length,
@@ -48,6 +53,13 @@ const Dashboard: React.FC = () => {
 
     fetchStats();
   }, []);
+
+  // ✅ Format revenue nicely in INR
+  const formattedRevenue = new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 2,
+  }).format(stats.totalRevenue);
 
   const statCards = [
     {
@@ -70,8 +82,8 @@ const Dashboard: React.FC = () => {
     },
     {
       title: 'Revenue',
-      value: `₹${stats.totalRevenue}`,
-      icon: DollarSign,
+      value: formattedRevenue, // ✅ show formatted value
+      icon: IndianRupee,
       color: 'bg-yellow-500',
     },
   ];
