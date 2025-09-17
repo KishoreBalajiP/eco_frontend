@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Package } from 'lucide-react';
+import { Package, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const Login: React.FC = () => {
@@ -12,6 +12,11 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const { login, user } = useAuth();
   const navigate = useNavigate();
+
+  // 🔑 states for password visibility
+  const [showPasswordByEye, setShowPasswordByEye] = useState(false);
+  const [showPasswordByCheckbox, setShowPasswordByCheckbox] = useState(false);
+  const isPasswordVisible = showPasswordByEye || showPasswordByCheckbox;
 
   React.useEffect(() => {
     if (user) {
@@ -75,16 +80,37 @@ const Login: React.FC = () => {
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Password
               </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter your password"
-              />
+              <div className="mt-1 relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={isPasswordVisible ? 'text' : 'password'}
+                  required
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="block w-full pr-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter your password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordByEye(!showPasswordByEye)}
+                  className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500"
+                >
+                  {isPasswordVisible ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+              <div className="mt-2 flex items-center">
+                <input
+                  id="show-password"
+                  type="checkbox"
+                  checked={showPasswordByCheckbox}
+                  onChange={() => setShowPasswordByCheckbox(!showPasswordByCheckbox)}
+                  className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                />
+                <label htmlFor="show-password" className="ml-2 text-sm text-gray-600">
+                  Show password
+                </label>
+              </div>
             </div>
           </div>
 

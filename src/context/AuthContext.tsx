@@ -1,3 +1,4 @@
+// context/AuthContext.tsx
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, AuthContextType } from '../types';
 import { authAPI } from '../services/api';
@@ -38,7 +39,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setToken(token);
       setUser(user);
     } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Login failed');
+      const message = error.response?.data?.message || 'Unable to sign in. Please try again.';
+      throw new Error(message);
     }
   };
 
@@ -52,7 +54,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setToken(token);
       setUser(user);
     } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Registration failed');
+      const message = error.response?.data?.message || 'Unable to create account. Please try again.';
+      throw new Error(message);
     }
   };
 
