@@ -29,7 +29,7 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
   return (
     <div className="flex items-center py-4 border-b border-gray-200">
       <img
-        src={item.image || 'https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg?auto=compress&cs=tinysrgb&w=200'}
+        src={item.image_url || 'https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg?auto=compress&cs=tinysrgb&w=200'}
         alt={item.name}
         className="w-16 h-16 object-cover rounded-lg mr-4"
       />

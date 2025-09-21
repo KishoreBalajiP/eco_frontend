@@ -166,8 +166,9 @@ const ProductsManagement: React.FC = () => {
               <tr key={product.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
+                    {/* Updated image property */}
                     <img
-                      src={product.image || 'https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg?auto=compress&cs=tinysrgb&w=100'}
+                      src={product.image_url || 'https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg?auto=compress&cs=tinysrgb&w=100'}
                       alt={product.name}
                       className="h-10 w-10 rounded-lg object-cover mr-4"
                     />
@@ -204,6 +205,7 @@ const ProductsManagement: React.FC = () => {
           <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
             <h2 className="text-lg font-semibold text-gray-900 mb-6">{editingProduct ? 'Edit Product' : 'Add New Product'}</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Form fields remain unchanged */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
                 <input

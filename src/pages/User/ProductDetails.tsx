@@ -71,7 +71,7 @@ const ProductDetails: React.FC = () => {
             {/* Product Image */}
             <div className="aspect-square bg-gray-200 rounded-lg overflow-hidden">
               <img
-                src={product.image || 'https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg?auto=compress&cs=tinysrgb&w=600'}
+                src={product.image_url || 'https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg?auto=compress&cs=tinysrgb&w=600'}
                 alt={product.name}
                 className="w-full h-full object-cover"
               />

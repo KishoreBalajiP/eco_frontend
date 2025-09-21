@@ -28,8 +28,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     <Link to={`/products/${product.id}`} className="group">
       <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
         <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden bg-gray-200 xl:aspect-w-7 xl:aspect-h-8">
+          {/* Updated image property */}
           <img
-            src={product.image || 'https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg?auto=compress&cs=tinysrgb&w=400'}
+            src={product.image_url || 'https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg?auto=compress&cs=tinysrgb&w=400'}
             alt={product.name}
             className="h-48 w-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
           />

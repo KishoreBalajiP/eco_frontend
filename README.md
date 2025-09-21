@@ -38,39 +38,54 @@ This is a modern e-commerce frontend built with React, TypeScript, Vite, and Tai
 
 ## Main Features & Workflow
 
-### 1. Authentication
-- `AuthContext.tsx` manages user login, registration, and session state.
-- Auth pages (`Login.tsx`, `Register.tsx`) allow users to sign in or create accounts.
-- Protected routes restrict access to certain pages based on user role (admin/user).
 
-### 2. Product Browsing
-- `Home.tsx` displays products using `ProductGrid` and supports search queries.
-- `ProductDetails.tsx` shows detailed info and allows adding to cart.
+## Main Features & Workflow
+
+### 1. Authentication & Security
+- User login, registration, and session state managed by `AuthContext.tsx`.
+- Password reset flow with email OTP verification (`ForgotPassword.tsx`, `VerifyOtp.tsx`, `ResetPassword.tsx`).
+- Protected routes restrict access to pages based on user role (admin/user).
+
+### 2. Product Browsing & Search
+- Browse products on `Home.tsx` with search functionality in navbar and home page.
+- View product details and add to cart (`ProductDetails.tsx`).
 
 ### 3. Cart Management
-- `CartContext.tsx` manages cart state and actions (add, update, remove).
-- `Cart.tsx` displays cart items using `CartItem` component.
-- `Checkout.tsx` handles order creation and payment method selection.
+- Add, update, and remove items from cart (`CartContext.tsx`, `Cart.tsx`).
+- Responsive cart UI with quantity controls and total calculation.
 
-### 4. Orders
-- Users can view their orders in `Orders.tsx` and see confirmation in `OrderConfirmation.tsx`.
-- Admins manage all orders in `OrdersManagement.tsx`.
+### 4. Checkout & Payments
+- Checkout supports multiple payment methods: Cash on Delivery, UPI (with transaction ID), and Razorpay/Card (`Checkout.tsx`).
+- Order confirmation page displays order and payment details (`OrderConfirmation.tsx`).
 
-### 5. Admin Dashboard
-- `Dashboard.tsx` shows stats (products, orders, users, revenue).
-- `ProductsManagement.tsx` allows CRUD operations on products.
-- `UsersManagement.tsx` manages user roles.
+### 5. Orders & History
+- Users can view their order history (`Orders.tsx`).
+- Admins manage all orders and update order status (pending, shipped, delivered, cancelled) (`OrdersManagement.tsx`).
 
-### 6. Chatbot
-- `Chatbot.tsx` provides a simple chatbot interface for user support.
+### 6. Admin Dashboard & Management
+- Dashboard shows stats: products, orders, users, revenue (`Dashboard.tsx`).
+- Admins can add, edit, and delete products with image upload (`ProductsManagement.tsx`).
+- User management with role assignment (user/admin) (`UsersManagement.tsx`).
 
-### 7. API Integration
+### 7. Chatbot Support
+- Floating chatbot for customer support on user pages (`Chatbot.tsx`).
+
+### 8. API Integration
 - All data is fetched and updated via REST APIs defined in `api.ts`.
 - Axios is used for HTTP requests, with interceptors for auth and error handling.
 
-### 8. UI & Styling
-- Tailwind CSS is used for fast, responsive UI development.
-- Lucide icons are used for visual elements.
+### 9. UI & Styling
+- Tailwind CSS for fast, responsive UI development.
+- Lucide icons for visual elements.
+- Modern, responsive layouts for all pages, with loading spinners and empty state messages.
+
+### 10. Role-based Routing
+- Protected routes for admin and user pages (`ProtectedRoute.tsx`).
+
+### 11. Search Functionality
+- Product and user search in admin panels and public pages.
+
+---
 
 ## How It Works
 

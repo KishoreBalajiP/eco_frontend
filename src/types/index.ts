@@ -11,7 +11,7 @@ export interface Product {
   price: number;
   description: string;
   stock: number;
-  image: string;
+  image_url: string;
 }
 
 export interface CartItem {
@@ -19,7 +19,7 @@ export interface CartItem {
   name: string;
   price: number;
   quantity: number;
-  image?: string;
+  image_url?: string;
 }
 
 export interface Order {
