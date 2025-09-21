@@ -130,16 +130,20 @@ export const chatbotAPI = {
 
 // -------------------- Admin APIs --------------------
 export const adminAPI = {
-  createProduct: async (product: Omit<Product, "id">) => {
-    const response = await api.post("/admin/products", product);
+  createProduct: async (product: FormData) => {
+    const response = await api.post("/admin/products", product, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     return response.data;
   },
 
-  updateProduct: async (id: number, product: Partial<Product>) => {
-    const response = await api.put(`/admin/products/${id}`, product);
+  updateProduct: async (id: number, product: FormData) => {
+    const response = await api.put(`/admin/products/${id}`, product, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     return response.data;
   },
-
+  
   deleteProduct: async (id: number) => {
     const response = await api.delete(`/admin/products/${id}`);
     return response.data;

@@ -10,12 +10,18 @@ const ProductsManagement: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    price: string;
+    description: string;
+    stock: string;
+    image: File | null;
+  }>({
     name: '',
     price: '',
     description: '',
     stock: '',
-    image: '',
+    image: null,
   });
 
   useEffect(() => {
@@ -23,9 +29,10 @@ const ProductsManagement: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const filtered = products.filter((product) =>
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchQuery.toLowerCase())
+    const filtered = products.filter(
+      (product) =>
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
     setFilteredProducts(filtered);
   }, [products, searchQuery]);
@@ -43,22 +50,21 @@ const ProductsManagement: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const productData = {
-      name: formData.name,
-      price: Number(formData.price),
-      description: formData.description,
-      stock: Number(formData.stock),
-      image: formData.image,
-    };
+
+    const form = new FormData();
+    form.append('name', formData.name);
+    form.append('price', formData.price);
+    form.append('description', formData.description);
+    form.append('stock', formData.stock);
+    if (formData.image) form.append('image', formData.image);
 
     try {
       if (editingProduct) {
-        await adminAPI.updateProduct(editingProduct.id, productData);
+        await adminAPI.updateProduct(editingProduct.id, form);
       } else {
-        await adminAPI.createProduct(productData);
+        await adminAPI.createProduct(form);
       }
-      
+
       setShowModal(false);
       setEditingProduct(null);
       resetForm();
@@ -76,7 +82,7 @@ const ProductsManagement: React.FC = () => {
       price: product.price.toString(),
       description: product.description,
       stock: product.stock.toString(),
-      image: product.image || '',
+      image: null,
     });
     setShowModal(true);
   };
@@ -99,7 +105,7 @@ const ProductsManagement: React.FC = () => {
       price: '',
       description: '',
       stock: '',
-      image: '',
+      image: null,
     });
   };
 
@@ -149,18 +155,10 @@ const ProductsManagement: React.FC = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Product
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Price
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Stock
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -174,32 +172,18 @@ const ProductsManagement: React.FC = () => {
                       className="h-10 w-10 rounded-lg object-cover mr-4"
                     />
                     <div>
-                      <div className="text-sm font-medium text-gray-900">
-                        {product.name}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {product.description.substring(0, 50)}...
-                      </div>
+                      <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                      <div className="text-sm text-gray-500">{product.description.substring(0, 50)}...</div>
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  ₹{product.price}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {product.stock}
-                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₹{product.price}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.stock}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-3">
-                  <button
-                    onClick={() => handleEdit(product)}
-                    className="text-blue-600 hover:text-blue-900"
-                  >
+                  <button onClick={() => handleEdit(product)} className="text-blue-600 hover:text-blue-900">
                     <Edit className="h-4 w-4" />
                   </button>
-                  <button
-                    onClick={() => handleDelete(product.id)}
-                    className="text-red-600 hover:text-red-900"
-                  >
+                  <button onClick={() => handleDelete(product.id)} className="text-red-600 hover:text-red-900">
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </td>
@@ -207,7 +191,6 @@ const ProductsManagement: React.FC = () => {
             ))}
           </tbody>
         </table>
-        
         {filteredProducts.length === 0 && (
           <div className="text-center py-8">
             <p className="text-gray-500">No products found</p>
@@ -219,15 +202,10 @@ const ProductsManagement: React.FC = () => {
       {showModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6">
-              {editingProduct ? 'Edit Product' : 'Add New Product'}
-            </h2>
-            
+            <h2 className="text-lg font-semibold text-gray-900 mb-6">{editingProduct ? 'Edit Product' : 'Add New Product'}</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Name
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
                 <input
                   type="text"
                   required
@@ -236,11 +214,8 @@ const ProductsManagement: React.FC = () => {
                   className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-              
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Price
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Price</label>
                 <input
                   type="number"
                   required
@@ -251,11 +226,8 @@ const ProductsManagement: React.FC = () => {
                   className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-              
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
                 <textarea
                   required
                   rows={3}
@@ -264,11 +236,8 @@ const ProductsManagement: React.FC = () => {
                   className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-              
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Stock
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Stock</label>
                 <input
                   type="number"
                   required
@@ -278,20 +247,15 @@ const ProductsManagement: React.FC = () => {
                   className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-              
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Image URL
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Product Image</label>
                 <input
-                  type="url"
-                  value={formData.image}
-                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setFormData({ ...formData, image: e.target.files?.[0] || null })}
                   className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="https://example.com/image.jpg"
                 />
               </div>
-              
               <div className="flex justify-end space-x-3 pt-6">
                 <button
                   type="button"
@@ -300,10 +264,7 @@ const ProductsManagement: React.FC = () => {
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
+                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
                   {editingProduct ? 'Update' : 'Create'}
                 </button>
               </div>
