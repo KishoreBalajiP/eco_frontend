@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, ShoppingCart, User, LogOut, Package } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
@@ -9,29 +9,30 @@ const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
   const { cart } = useCart();
   const navigate = useNavigate();
-  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   const cartItemsCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  // Update searchQuery from URL when user navigates
+  // Initialize searchQuery from URL if exists
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    setSearchQuery(params.get('q') || '');
-  }, [location.search]);
+    const q = searchParams.get('q') || '';
+    setSearchQuery(q);
+  }, [searchParams]);
 
-  // Live search: update URL as user types
+  // Debounced live search: update URL query without navigating
   useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      if (searchQuery.trim()) {
-        navigate(`/?q=${encodeURIComponent(searchQuery.trim())}`, { replace: true });
+    const delay = setTimeout(() => {
+      const trimmedQuery = searchQuery.trim();
+      if (trimmedQuery) {
+        setSearchParams({ q: trimmedQuery });
       } else {
-        navigate(`/`, { replace: true });
+        setSearchParams({}); // removes query from URL
       }
-    }, 300); // 300ms debounce
+    }, 300);
 
-    return () => clearTimeout(delayDebounce);
-  }, [searchQuery, navigate]);
+    return () => clearTimeout(delay);
+  }, [searchQuery, setSearchParams]);
 
   const handleLogout = () => {
     logout();
