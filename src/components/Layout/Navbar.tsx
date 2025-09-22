@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Search, ShoppingCart, User, LogOut, Package } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
@@ -9,21 +9,34 @@ const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
   const { cart } = useCart();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/?q=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  };
+  const cartItemsCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  // Update searchQuery from URL when user navigates
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    setSearchQuery(params.get('q') || '');
+  }, [location.search]);
+
+  // Live search: update URL as user types
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      if (searchQuery.trim()) {
+        navigate(`/?q=${encodeURIComponent(searchQuery.trim())}`, { replace: true });
+      } else {
+        navigate(`/`, { replace: true });
+      }
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchQuery, navigate]);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
-
-  const cartItemsCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <nav className="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50">
@@ -36,7 +49,7 @@ const Navbar: React.FC = () => {
           </Link>
 
           {/* Search Bar */}
-          <form onSubmit={handleSearch} className="flex-1 max-w-lg mx-8">
+          <div className="flex-1 max-w-lg mx-8">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <input
@@ -47,17 +60,13 @@ const Navbar: React.FC = () => {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
-          </form>
+          </div>
 
           {/* Right Menu */}
           <div className="flex items-center space-x-4">
             {user ? (
               <>
-                {/* Cart */}
-                <Link
-                  to="/cart"
-                  className="relative p-2 text-gray-600 hover:text-blue-600 transition-colors"
-                >
+                <Link to="/cart" className="relative p-2 text-gray-600 hover:text-blue-600 transition-colors">
                   <ShoppingCart className="h-6 w-6" />
                   {cartItemsCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
@@ -66,7 +75,6 @@ const Navbar: React.FC = () => {
                   )}
                 </Link>
 
-                {/* User Menu */}
                 <div className="relative">
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
