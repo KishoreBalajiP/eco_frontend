@@ -16,7 +16,10 @@ const ForgotPassword: React.FC = () => {
     try {
       await authAPI.sendOtp(email);
       setMessage('OTP sent to your email!');
-      navigate('/verify-otp', { state: { email } });
+      
+      // Store email in localStorage for persistence
+      localStorage.setItem('resetPasswordEmail', email);
+      navigate('/verify-otp');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Something went wrong.');
     }
