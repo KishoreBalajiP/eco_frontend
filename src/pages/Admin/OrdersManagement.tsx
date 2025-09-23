@@ -35,6 +35,13 @@ const OrdersManagement: React.FC = () => {
 
   const updateOrderStatus = async (orderId: number, newStatus: string) => {
     try {
+      // Prevent changing status if cancelled
+      const order = orders.find(o => o.id === orderId);
+      if (order?.status === "cancelled") {
+        alert("Cancelled orders cannot be updated");
+        return;
+      }
+
       await adminAPI.updateOrderStatus(orderId, newStatus);
       fetchOrders();
     } catch (error) {
@@ -124,22 +131,33 @@ const OrdersManagement: React.FC = () => {
                   ₹{order.total}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <select
-                    value={order.status}
-                    onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)} border-none focus:ring-2 focus:ring-blue-500`}
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="shipped">Shipped</option>
-                    <option value="delivered">Delivered</option>
-                    <option value="cancelled">Cancelled</option>
-                  </select>
+                  <div className="flex items-center">
+                    <select
+                      value={order.status}
+                      onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                      disabled={order.status === "cancelled"}
+                      className={`px-3 py-1 rounded-full text-xs font-medium 
+                        ${getStatusColor(order.status)} border-none focus:ring-2 focus:ring-blue-500
+                        ${order.status === "cancelled" ? "bg-gray-200 cursor-not-allowed" : "bg-white"}`}
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="shipped">Shipped</option>
+                      <option value="delivered">Delivered</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                    {order.status === "cancelled" && (
+                      <span className="text-red-600 text-xs ml-2">Cancelled by user</span>
+                    )}
+                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {new Date(order.created_at).toLocaleDateString()}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button className="text-blue-600 hover:text-blue-900">
+                  <button
+                    className={`text-blue-600 hover:text-blue-900 ${order.status === "cancelled" ? "opacity-50 cursor-not-allowed" : ""}`}
+                    disabled={order.status === "cancelled"}
+                  >
                     <Eye className="h-4 w-4" />
                   </button>
                 </td>
@@ -147,7 +165,7 @@ const OrdersManagement: React.FC = () => {
             ))}
           </tbody>
         </table>
-        
+
         {filteredOrders.length === 0 && (
           <div className="text-center py-8">
             <p className="text-gray-500">No orders found</p>

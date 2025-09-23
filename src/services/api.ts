@@ -110,7 +110,13 @@ export const ordersAPI = {
     const response = await api.get(`/orders/${id}`);
     return response.data;
   },
+
+  cancelOrder: async (id: number) => {
+    const response = await api.patch(`/orders/${id}/cancel`);
+    return response.data;
+  },
 };
+
 
 // -------------------- Payments APIs --------------------
 export const paymentsAPI = {
@@ -143,7 +149,7 @@ export const adminAPI = {
     });
     return response.data;
   },
-  
+
   deleteProduct: async (id: number) => {
     const response = await api.delete(`/admin/products/${id}`);
     return response.data;
