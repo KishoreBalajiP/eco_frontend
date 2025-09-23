@@ -6,6 +6,7 @@ import { Order, OrderItem } from "../../types";
 const Orders: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [processingOrderId, setProcessingOrderId] = useState<number | null>(null); // Track order being canceled
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -13,7 +14,6 @@ const Orders: React.FC = () => {
         const response = await ordersAPI.getOrders();
         const ordersList: Order[] = response.orders || [];
 
-        // Fetch detailed items for each order
         const detailedOrders: Order[] = await Promise.all(
           ordersList.map(async (order: Order) => {
             const details = await ordersAPI.getOrder(order.id);
@@ -66,7 +66,9 @@ const Orders: React.FC = () => {
     if (!window.confirm("Are you sure you want to cancel this order?")) return;
 
     try {
+      setProcessingOrderId(orderId); // mark as processing
       await ordersAPI.cancelOrder(orderId);
+
       setOrders(prev =>
         prev.map(o => (o.id === orderId ? { ...o, status: "cancelled" } : o))
       );
@@ -74,6 +76,8 @@ const Orders: React.FC = () => {
     } catch (err) {
       console.error(err);
       alert("Failed to cancel order.");
+    } finally {
+      setProcessingOrderId(null); // reset processing state
     }
   };
 
@@ -127,7 +131,6 @@ const Orders: React.FC = () => {
                 </div>
               </div>
 
-              {/* Show order items */}
               {order.items && order.items.length > 0 && (
                 <div className="mb-4">
                   <h4 className="font-medium text-gray-900 mb-2">Items:</h4>
@@ -152,13 +155,17 @@ const Orders: React.FC = () => {
                   Total: ₹{order.total}
                 </span>
 
-                {/* Cancel order button */}
                 {order.status === "pending" && (
                   <button
-                    className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                    className={`px-3 py-1 rounded text-white ${
+                      processingOrderId === order.id
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-red-500 hover:bg-red-600"
+                    }`}
                     onClick={() => handleCancelOrder(order.id)}
+                    disabled={processingOrderId === order.id} // disable while processing
                   >
-                    Cancel Order
+                    {processingOrderId === order.id ? "Cancelling..." : "Cancel Order"}
                   </button>
                 )}
               </div>
