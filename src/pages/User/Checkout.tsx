@@ -16,6 +16,7 @@ const Checkout: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod');
   const [upiTransactionId, setUpiTransactionId] = useState('');
+  const [orderCreated, setOrderCreated] = useState(false); // Prevent flash
 
   // Fetch shipping info from backend
   useEffect(() => {
@@ -53,7 +54,7 @@ const Checkout: React.FC = () => {
     try {
       const response = await ordersAPI.createOrder(shipping);
 
-      // Prepare cart items to send to OrderConfirmation
+      // Prepare cart items for confirmation page
       const itemsForConfirmation: CartItem[] = cart.map(item => ({
         product_id: item.product_id,
         name: item.name,
@@ -62,8 +63,13 @@ const Checkout: React.FC = () => {
         image_url: item.image_url,
       }));
 
+      // Prevent flash
+      setOrderCreated(true);
+
+      // Clear cart after marking order created
       clearCart();
 
+      // Navigate to confirmation
       navigate(`/order-confirmation/${response.order.id}`, {
         state: {
           paymentMethod,
@@ -82,7 +88,8 @@ const Checkout: React.FC = () => {
     }
   };
 
-  if (!shipping) return null; // Wait for shipping info
+  // Prevent rendering after order creation to avoid flash
+  if (!shipping || orderCreated) return null;
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">

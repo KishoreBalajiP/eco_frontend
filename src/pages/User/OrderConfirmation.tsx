@@ -1,7 +1,8 @@
 // src/pages/User/OrderConfirmation.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useLocation, Link } from 'react-router-dom';
 import { CheckCircle, Package } from 'lucide-react';
+import api from '../../services/api';
 import { Shipping, CartItem } from '../../types';
 
 interface LocationState {
@@ -16,8 +17,52 @@ interface LocationState {
 const OrderConfirmation: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const location = useLocation();
-  const { paymentMethod, transactionId, status, shipping, items, total } =
-    (location.state as LocationState) || {};
+  const initialState = (location.state as LocationState) || null;
+
+  const [orderData, setOrderData] = useState<LocationState | null>(initialState);
+  const [loading, setLoading] = useState(!initialState);
+
+  // Fetch order from backend if state is missing (e.g., on page refresh)
+  useEffect(() => {
+    const fetchOrder = async () => {
+      if (orderData) return; // Already have data
+
+      try {
+        setLoading(true);
+        const res = await api.get(`/orders/${orderId}`);
+        const order = res.data.order;
+        const items = res.data.items;
+
+        setOrderData({
+          paymentMethod: order.paymentMethod || 'cod',
+          transactionId: order.transactionId,
+          status: order.status as 'pending' | 'paid',
+          shipping: {
+            shipping_name: order.shipping_name,
+            shipping_mobile: order.shipping_mobile,
+            shipping_line1: order.shipping_line1,
+            shipping_line2: order.shipping_line2,
+            shipping_city: order.shipping_city,
+            shipping_state: order.shipping_state,
+            shipping_postal_code: order.shipping_postal_code,
+            shipping_country: order.shipping_country,
+          },
+          items,
+          total: order.total,
+        });
+      } catch (err) {
+        console.error('Failed to fetch order:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrder();
+  }, [orderId, orderData]);
+
+  if (loading || !orderData) return null; // Wait until data is ready
+
+  const { paymentMethod, transactionId, status, shipping, items, total } = orderData;
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
