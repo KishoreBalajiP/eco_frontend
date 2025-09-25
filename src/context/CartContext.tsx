@@ -1,3 +1,4 @@
+// src/context/CartContext.tsx
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { CartItem, CartContextType } from '../types';
 import { cartAPI } from '../services/api';
@@ -19,7 +20,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchCart = async () => {
     if (!user) return;
-    
+
     try {
       const response = await cartAPI.getCart();
       setCart(response.cart || []);

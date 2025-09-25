@@ -1,6 +1,6 @@
 // src/services/api.ts
 import axios from "axios";
-import { User, Product } from "../types";
+import { User, Product, Shipping } from "../types";
 
 const API_BASE_URL = "http://localhost:5000/api";
 
@@ -96,8 +96,21 @@ export const cartAPI = {
 
 // -------------------- Orders APIs --------------------
 export const ordersAPI = {
-  createOrder: async (currency = "INR") => {
-    const response = await api.post("/orders", { currency });
+  createOrder: async (shipping: Shipping, currency = "INR") => {
+    // Flatten shipping fields for backend
+    const payload = {
+      shipping_name: shipping.shipping_name,
+      shipping_mobile: shipping.shipping_mobile,
+      shipping_line1: shipping.shipping_line1,
+      shipping_line2: shipping.shipping_line2,
+      shipping_city: shipping.shipping_city,
+      shipping_state: shipping.shipping_state,
+      shipping_postal_code: shipping.shipping_postal_code,
+      shipping_country: shipping.shipping_country,
+      currency,
+    };
+
+    const response = await api.post("/orders", payload);
     return response.data;
   },
 
@@ -116,7 +129,6 @@ export const ordersAPI = {
     return response.data;
   },
 };
-
 
 // -------------------- Payments APIs --------------------
 export const paymentsAPI = {

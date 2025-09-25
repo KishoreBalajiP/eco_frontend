@@ -1,8 +1,19 @@
+// src/types/index.ts
+
 export interface User {
   id: number;
   name: string;
   email: string;
-  role: 'user' | 'admin';
+  role: "user" | "admin";
+  // shipping info from DB
+  shipping_name?: string;
+  shipping_mobile?: string;
+  shipping_line1?: string;
+  shipping_line2?: string;
+  shipping_city?: string;
+  shipping_state?: string;
+  shipping_postal_code?: string;
+  shipping_country?: string;
 }
 
 export interface Product {
@@ -27,9 +38,10 @@ export interface Order {
   user_id?: number;
   user?: string;
   total: number;
-  status: 'pending' | 'shipped' | 'delivered' | 'cancelled';
+  status: "pending" | "shipped" | "delivered" | "cancelled";
   created_at: string;
   items?: OrderItem[];
+  shipping?: Shipping; // snapshot of shipping at order time
 }
 
 export interface OrderItem {
@@ -56,4 +68,16 @@ export interface CartContextType {
   clearCart: () => void;
   total: number;
   fetchCart: () => Promise<void>;
+}
+
+// Updated to match DB
+export interface Shipping {
+  shipping_name: string;
+  shipping_mobile: string;
+  shipping_line1: string;
+  shipping_line2?: string;
+  shipping_city: string;
+  shipping_state: string;
+  shipping_postal_code: string;
+  shipping_country: string;
 }

@@ -1,75 +1,99 @@
-import React, { useState } from 'react';
+// src/pages/User/Checkout.tsx
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CreditCard, Truck, Smartphone } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
-import { ordersAPI, paymentsAPI } from '../../services/api';
+import { ordersAPI } from '../../services/api';
+import api from '../../services/api';
+import { Shipping, CartItem } from '../../types';
+import { Truck, CreditCard, Smartphone } from 'lucide-react';
 
 type PaymentMethod = 'cod' | 'upi' | 'card' | 'razorpay';
 
 const Checkout: React.FC = () => {
   const { cart, total, clearCart } = useCart();
   const navigate = useNavigate();
+  const [shipping, setShipping] = useState<Shipping | null>(null);
+  const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod');
   const [upiTransactionId, setUpiTransactionId] = useState('');
-  const [loading, setLoading] = useState(false);
+
+  // Fetch shipping info from backend
+  useEffect(() => {
+    const fetchShipping = async () => {
+      try {
+        const { data } = await api.get('/users/me/shipping');
+        if (
+          !data.shipping_name ||
+          !data.shipping_mobile ||
+          !data.shipping_line1 ||
+          !data.shipping_city ||
+          !data.shipping_state ||
+          !data.shipping_postal_code ||
+          !data.shipping_country
+        ) {
+          alert('Please add your shipping address first.');
+          navigate('/profile');
+        } else {
+          setShipping(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch shipping info', err);
+        alert('Please add your shipping address first.');
+        navigate('/profile');
+      }
+    };
+
+    fetchShipping();
+  }, [navigate]);
 
   const handleCheckout = async () => {
+    if (!shipping || cart.length === 0) return;
+
     setLoading(true);
-    
     try {
-      if (paymentMethod === 'cod') {
-        const response = await ordersAPI.createOrder();
-        clearCart();
-        navigate(`/order-confirmation/${response.order.id}`, {
-          state: { paymentMethod: 'cod', status: 'pending' }
-        });
-      } else if (paymentMethod === 'upi' && upiTransactionId) {
-        const response = await ordersAPI.createOrder();
-        clearCart();
-        navigate(`/order-confirmation/${response.order.id}`, {
-          state: { paymentMethod: 'upi', transactionId: upiTransactionId }
-        });
-      } else if (paymentMethod === 'razorpay') {
-        const orderResponse = await paymentsAPI.createOrder(
-          total * 100, // Convert to paise
-          'INR',
-          `order_${Date.now()}`
-        );
-        
-        // Simulate Razorpay payment success
-        setTimeout(() => {
-          clearCart();
-          navigate(`/order-confirmation/${orderResponse.order.id}`, {
-            state: { paymentMethod: 'razorpay', status: 'paid' }
-          });
-        }, 2000);
-      }
-    } catch (error) {
-      console.error('Checkout failed:', error);
+      const response = await ordersAPI.createOrder(shipping);
+
+      // Prepare cart items to send to OrderConfirmation
+      const itemsForConfirmation: CartItem[] = cart.map(item => ({
+        product_id: item.product_id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        image_url: item.image_url,
+      }));
+
+      clearCart();
+
+      navigate(`/order-confirmation/${response.order.id}`, {
+        state: {
+          paymentMethod,
+          transactionId: paymentMethod === 'upi' ? upiTransactionId : undefined,
+          shipping,
+          status: paymentMethod === 'cod' ? 'pending' : 'paid',
+          items: itemsForConfirmation,
+          total,
+        },
+      });
+    } catch (err) {
+      console.error('Checkout failed', err);
       alert('Checkout failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const isFormValid = () => {
-    if (paymentMethod === 'upi') {
-      return upiTransactionId.trim().length > 0;
-    }
-    return true;
-  };
+  if (!shipping) return null; // Wait for shipping info
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-8">Checkout</h1>
-        
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="max-w-4xl w-full bg-white rounded-lg shadow-md p-8">
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">Checkout</h1>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Order Summary */}
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h2>
-            
-            <div className="space-y-3 mb-6">
+            <div className="space-y-3 mb-4">
               {cart.map((item) => (
                 <div key={item.product_id} className="flex justify-between text-sm">
                   <span>{item.name} × {item.quantity}</span>
@@ -77,97 +101,91 @@ const Checkout: React.FC = () => {
                 </div>
               ))}
             </div>
-            
-            <div className="border-t border-gray-200 pt-4">
-              <div className="flex justify-between text-lg font-semibold">
-                <span>Total</span>
-                <span>₹{total}</span>
-              </div>
+            <div className="border-t border-gray-200 pt-4 flex justify-between font-semibold">
+              <span>Total</span>
+              <span>₹{total}</span>
             </div>
           </div>
 
-          {/* Payment Methods */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Payment Method</h2>
-            
-            <div className="space-y-4">
-              {/* Cash on Delivery */}
-              <div className="border rounded-lg p-4">
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="cod"
-                    checked={paymentMethod === 'cod'}
-                    onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                    className="mr-3"
-                  />
-                  <Truck className="h-5 w-5 mr-2 text-gray-600" />
-                  <span>Cash on Delivery</span>
-                </label>
-                {paymentMethod === 'cod' && (
-                  <p className="text-sm text-gray-600 mt-2 ml-8">
-                    Pay when your order is delivered
-                  </p>
-                )}
-              </div>
+          {/* Payment & Shipping */}
+          <div className="bg-white rounded-lg shadow p-6 space-y-6">
+            {/* Shipping Info */}
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 mb-2">Shipping To</h2>
+              <p>{shipping.shipping_name}</p>
+              <p>{shipping.shipping_mobile}</p>
+              <p>
+                {shipping.shipping_line1}{shipping.shipping_line2 ? `, ${shipping.shipping_line2}` : ''}, {shipping.shipping_city}, {shipping.shipping_state}, {shipping.shipping_postal_code}, {shipping.shipping_country}
+              </p>
+            </div>
 
-              {/* UPI */}
-              <div className="border rounded-lg p-4">
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="upi"
-                    checked={paymentMethod === 'upi'}
-                    onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                    className="mr-3"
-                  />
-                  <Smartphone className="h-5 w-5 mr-2 text-gray-600" />
-                  <span>UPI Payment</span>
-                </label>
-                {paymentMethod === 'upi' && (
-                  <div className="mt-3 ml-8">
-                    <p className="text-sm text-gray-600 mb-2">
-                      UPI ID: merchant@upi
-                    </p>
+            {/* Payment Methods */}
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 mb-2">Payment Method</h2>
+              <div className="space-y-4">
+                {/* Cash on Delivery */}
+                <div className="border rounded-lg p-3">
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="cod"
+                      checked={paymentMethod === 'cod'}
+                      onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                      className="mr-3"
+                    />
+                    <Truck className="h-5 w-5 mr-2 text-gray-600" />
+                    <span>Cash on Delivery</span>
+                  </label>
+                </div>
+
+                {/* UPI */}
+                <div className="border rounded-lg p-3">
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="upi"
+                      checked={paymentMethod === 'upi'}
+                      onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                      className="mr-3"
+                    />
+                    <Smartphone className="h-5 w-5 mr-2 text-gray-600" />
+                    <span>UPI Payment</span>
+                  </label>
+                  {paymentMethod === 'upi' && (
                     <input
                       type="text"
                       placeholder="Enter transaction ID"
                       value={upiTransactionId}
                       onChange={(e) => setUpiTransactionId(e.target.value)}
-                      className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full p-2 border border-gray-300 rounded mt-2"
                     />
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
 
-              {/* Razorpay */}
-              <div className="border rounded-lg p-4">
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="razorpay"
-                    checked={paymentMethod === 'razorpay'}
-                    onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                    className="mr-3"
-                  />
-                  <CreditCard className="h-5 w-5 mr-2 text-gray-600" />
-                  <span>Card Payment (Razorpay)</span>
-                </label>
-                {paymentMethod === 'razorpay' && (
-                  <p className="text-sm text-gray-600 mt-2 ml-8">
-                    Secure payment via Razorpay
-                  </p>
-                )}
+                {/* Card */}
+                <div className="border rounded-lg p-3">
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="razorpay"
+                      checked={paymentMethod === 'razorpay'}
+                      onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                      className="mr-3"
+                    />
+                    <CreditCard className="h-5 w-5 mr-2 text-gray-600" />
+                    <span>Card Payment (Razorpay)</span>
+                  </label>
+                </div>
               </div>
             </div>
 
             <button
               onClick={handleCheckout}
-              disabled={loading || !isFormValid()}
-              className="w-full mt-6 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading || cart.length === 0}
+              className="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 disabled:opacity-50"
             >
               {loading ? 'Processing...' : 'Complete Order'}
             </button>
