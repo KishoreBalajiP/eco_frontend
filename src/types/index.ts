@@ -42,6 +42,10 @@ export interface Order {
   created_at: string;
   items?: OrderItem[];
   shipping?: Shipping; // snapshot of shipping at order time
+  // NEW: payment info to see in admin panel.
+  payment_method?: string; // e.g., 'COD' or 'Razorpay'
+  payment_status?: 'paid' | 'pending';
+  
 }
 
 export interface OrderItem {

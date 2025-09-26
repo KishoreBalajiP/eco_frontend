@@ -186,6 +186,12 @@ export const adminAPI = {
     const response = await api.patch(`/admin/users/${id}/role`, { role });
     return response.data;
   },
+  // ---------------- actions in admin panel ----------------
+  getOrderById: async (id: number) => {  // CHANGED
+  const response = await api.get(`/admin/orders/${id}`);
+  return response.data; // { order, items }
+  },
+
 };
 
 export default api;

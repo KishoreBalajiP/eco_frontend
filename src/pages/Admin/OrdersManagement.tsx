@@ -1,13 +1,18 @@
+// src/pages/Admin/OrdersManagement.tsx
 import React, { useEffect, useState } from 'react';
-import { Search, Eye } from 'lucide-react';
+import { Search, Eye, X } from 'lucide-react';
 import { adminAPI } from '../../services/api';
-import { Order } from '../../types';
+import { Order, OrderItem } from '../../types';
 
 const OrdersManagement: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Modal state
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchOrders();
@@ -35,10 +40,9 @@ const OrdersManagement: React.FC = () => {
 
   const updateOrderStatus = async (orderId: number, newStatus: string) => {
     try {
-      // Prevent changing status if cancelled
       const order = orders.find(o => o.id === orderId);
-      if (order?.status === "cancelled") {
-        alert("Cancelled orders cannot be updated");
+      if (order?.status === 'cancelled') {
+        alert('Cancelled orders cannot be updated');
         return;
       }
 
@@ -63,6 +67,23 @@ const OrdersManagement: React.FC = () => {
       default:
         return 'text-gray-700 bg-gray-100';
     }
+  };
+
+  const handleViewOrder = async (orderId: number) => {
+    try {
+      // Fetch full order details from backend
+      const response = await adminAPI.getOrderById(orderId);
+      setSelectedOrder(response.order);
+      setIsModalOpen(true);
+    } catch (err) {
+      console.error('Failed to fetch order details:', err);
+      alert('Cannot fetch order details');
+    }
+  };
+
+  const closeModal = () => {
+    setSelectedOrder(null);
+    setIsModalOpen(false);
   };
 
   if (loading) {
@@ -98,65 +119,45 @@ const OrdersManagement: React.FC = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Order ID
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Customer
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Amount
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Date
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredOrders.map((order) => (
               <tr key={order.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  #{order.id}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {order.user || 'Unknown'}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  ₹{order.total}
-                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{order.id}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.user || 'Unknown'}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₹{order.total}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <select
                       value={order.status}
                       onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                      disabled={order.status === "cancelled"}
+                      disabled={order.status === 'cancelled'}
                       className={`px-3 py-1 rounded-full text-xs font-medium 
                         ${getStatusColor(order.status)} border-none focus:ring-2 focus:ring-blue-500
-                        ${order.status === "cancelled" ? "bg-gray-200 cursor-not-allowed" : "bg-white"}`}
+                        ${order.status === 'cancelled' ? 'bg-gray-200 cursor-not-allowed' : 'bg-white'}`}
                     >
                       <option value="pending">Pending</option>
                       <option value="shipped">Shipped</option>
                       <option value="delivered">Delivered</option>
                       <option value="cancelled">Cancelled</option>
                     </select>
-                    {order.status === "cancelled" && (
+                    {order.status === 'cancelled' && (
                       <span className="text-red-600 text-xs ml-2">Cancelled by user</span>
                     )}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {new Date(order.created_at).toLocaleDateString()}
-                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{new Date(order.created_at).toLocaleDateString()}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <button
-                    className={`text-blue-600 hover:text-blue-900 ${order.status === "cancelled" ? "opacity-50 cursor-not-allowed" : ""}`}
-                    disabled={order.status === "cancelled"}
+                    className="text-blue-600 hover:text-blue-900"
+                    onClick={() => handleViewOrder(order.id)}
                   >
                     <Eye className="h-4 w-4" />
                   </button>
@@ -172,6 +173,61 @@ const OrdersManagement: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Order Summary Modal */}
+      {isModalOpen && selectedOrder && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 relative">
+            <button
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+              onClick={closeModal}
+            >
+              <X />
+            </button>
+
+            <h2 className="text-xl font-bold mb-4">Order #{selectedOrder.id} Summary</h2>
+
+            <div className="mb-4">
+              <h3 className="font-semibold">Customer Info</h3>
+              <p>{selectedOrder.user || 'Unknown'}</p>
+            </div>
+
+            {selectedOrder.shipping && (
+              <div className="mb-4">
+                <h3 className="font-semibold">Shipping Address</h3>
+                <p>{selectedOrder.shipping.shipping_name}</p>
+                <p>{selectedOrder.shipping.shipping_mobile}</p>
+                <p>
+                  {selectedOrder.shipping.shipping_line1}, {selectedOrder.shipping.shipping_line2 && `${selectedOrder.shipping.shipping_line2}, `}
+                  {selectedOrder.shipping.shipping_city}, {selectedOrder.shipping.shipping_state} - {selectedOrder.shipping.shipping_postal_code}, {selectedOrder.shipping.shipping_country}
+                </p>
+              </div>
+            )}
+
+            {selectedOrder.items && selectedOrder.items.length > 0 && (
+              <div className="mb-4">
+                <h3 className="font-semibold">Items</h3>
+                <ul className="list-disc list-inside">
+                  {selectedOrder.items.map((item: OrderItem) => (
+                    <li key={item.product_id}>
+                      {item.name} x {item.quantity} - ₹{item.price * item.quantity}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Payment Info */}
+            <div className="mb-4">
+              <h3 className="font-semibold">Payment Info</h3>
+              <p>Method: {selectedOrder.payment_method || 'COD'}</p>
+              <p>Status: {selectedOrder.payment_status === 'paid' ? 'Paid' : 'Pending'}</p>
+            </div>
+
+            <div className="text-right font-bold">Total: ₹{selectedOrder.total}</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
