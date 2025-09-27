@@ -38,7 +38,10 @@ const OrdersManagement: React.FC = () => {
     }
   };
 
-  const updateOrderStatus = async (orderId: number, newStatus: string) => {
+  const updateOrderStatus = async (
+    orderId: number,
+    newStatus: 'pending' | 'shipped' | 'delivered' | 'cancelled'
+  ) => {
     try {
       const order = orders.find(o => o.id === orderId);
       if (order?.status === 'cancelled') {
@@ -71,7 +74,6 @@ const OrdersManagement: React.FC = () => {
 
   const handleViewOrder = async (orderId: number) => {
     try {
-      // Fetch full order details from backend
       const response = await adminAPI.getOrderById(orderId);
       setSelectedOrder(response.order);
       setIsModalOpen(true);
@@ -137,7 +139,12 @@ const OrdersManagement: React.FC = () => {
                   <div className="flex items-center">
                     <select
                       value={order.status}
-                      onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                      onChange={(e) =>
+                        updateOrderStatus(
+                          order.id,
+                          e.target.value as 'pending' | 'shipped' | 'delivered' | 'cancelled'
+                        )
+                      }
                       disabled={order.status === 'cancelled'}
                       className={`px-3 py-1 rounded-full text-xs font-medium 
                         ${getStatusColor(order.status)} border-none focus:ring-2 focus:ring-blue-500
@@ -149,7 +156,9 @@ const OrdersManagement: React.FC = () => {
                       <option value="cancelled">Cancelled</option>
                     </select>
                     {order.status === 'cancelled' && (
-                      <span className="text-red-600 text-xs ml-2">Cancelled by user</span>
+                      <span className="text-red-600 text-xs ml-2">
+                        Cancelled by {order.cancelled_by === 'admin' ? 'admin' : 'user'}
+                      </span>
                     )}
                   </div>
                 </td>
@@ -223,6 +232,12 @@ const OrdersManagement: React.FC = () => {
               <p>Method: {selectedOrder.payment_method || 'COD'}</p>
               <p>Status: {selectedOrder.payment_status === 'paid' ? 'Paid' : 'Pending'}</p>
             </div>
+
+            {selectedOrder.status === 'cancelled' && (
+              <div className="mb-2 text-red-600 font-semibold">
+                Cancelled by {selectedOrder.cancelled_by === 'admin' ? 'admin' : 'user'}
+              </div>
+            )}
 
             <div className="text-right font-bold">Total: ₹{selectedOrder.total}</div>
           </div>

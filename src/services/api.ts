@@ -1,6 +1,6 @@
 // src/services/api.ts
 import axios from "axios";
-import { User, Product, Shipping } from "../types";
+import { User, Product, Order, Shipping } from "../types";
 
 const API_BASE_URL = "http://localhost:5000/api";
 
@@ -167,31 +167,34 @@ export const adminAPI = {
     return response.data;
   },
 
-  getOrders: async () => {
+  getOrders: async (): Promise<{ orders: Order[] }> => {
     const response = await api.get("/admin/orders");
     return response.data;
   },
 
-  updateOrderStatus: async (id: number, status: string) => {
+  updateOrderStatus: async (
+    id: number,
+    status: "pending" | "shipped" | "delivered" | "cancelled"
+  ): Promise<{ order: Order }> => {
     const response = await api.patch(`/admin/orders/${id}/status`, { status });
     return response.data;
   },
 
-  getUsers: async () => {
+  getUsers: async (): Promise<{ users: User[] }> => {
     const response = await api.get("/admin/users");
     return response.data;
   },
 
-  updateUserRole: async (id: number, role: string) => {
+  updateUserRole: async (id: number, role: string): Promise<User> => {
     const response = await api.patch(`/admin/users/${id}/role`, { role });
     return response.data;
   },
-  // ---------------- actions in admin panel ----------------
-  getOrderById: async (id: number) => {  // CHANGED
-  const response = await api.get(`/admin/orders/${id}`);
-  return response.data; // { order, items }
-  },
 
+  // ---------------- actions in admin panel ----------------
+  getOrderById: async (id: number): Promise<{ order: Order }> => {
+    const response = await api.get(`/admin/orders/${id}`);
+    return response.data; // { order }
+  },
 };
 
 export default api;
