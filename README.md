@@ -2,38 +2,66 @@
 
 This is a modern e-commerce frontend built with React, TypeScript, Vite, and Tailwind CSS. It supports user and admin roles, authentication, product browsing, cart management, order processing, and admin dashboards. Below is a detailed overview of the project structure and workflow.
 
+
 ## Project Structure
 
 ```
-├── public/
+├── public/                         # Static assets (images, favicon, etc.)
 ├── src/
-│   ├── App.tsx                # Main app component, sets up routing and context providers
-│   ├── main.tsx               # Entry point, renders App
-│   ├── index.css              # Tailwind CSS imports
-│   ├── vite-env.d.ts          # Vite type definitions
-│   ├── components/
-│   │   ├── Cart/              # Cart item UI
-│   │   ├── Chatbot/           # Chatbot UI
-│   │   ├── Common/            # ProtectedRoute for auth
-│   │   ├── Layout/            # Navbar and AdminSidebar
-│   │   └── Products/          # ProductCard and ProductGrid
-│   ├── context/
-│   │   ├── AuthContext.tsx    # Auth state and logic
-│   │   └── CartContext.tsx    # Cart state and logic
-│   ├── pages/
-│   │   ├── Admin/             # Dashboard, Products, Orders, Users management
-│   │   ├── Auth/              # Login and Register
-│   │   └── User/              # Home, Cart, Checkout, Orders, ProductDetails
+│   ├── App.tsx                     # Main app component. Sets up all routes and context providers.
+│   ├── main.tsx                    # Entry point. Renders the App into the DOM.
+│   ├── index.css                   # Tailwind CSS imports and global styles.
+│   ├── vite-env.d.ts               # Vite type definitions for TypeScript.
+│   ├── components/                 # Reusable UI components
+│   │   ├── Cart/
+│   │   │   └── CartItem.tsx        # UI and logic for a single cart item (quantity, remove, etc.)
+│   │   ├── Chatbot/
+│   │   │   └── Chatbot.tsx         # Floating chatbot for customer support, API integration.
+│   │   ├── Common/
+│   │   │   └── ProtectedRoute.tsx  # Wrapper for protecting routes by auth/role.
+│   │   ├── Layout/
+│   │   │   ├── AdminSidebar.tsx    # Sidebar navigation for admin dashboard.
+│   │   │   └── Navbar.tsx          # Top navigation bar with search, cart, user menu.
+│   │   └── Products/
+│   │       ├── ProductCard.tsx     # Card UI for a single product (image, price, add to cart).
+│   │       └── ProductGrid.tsx     # Grid layout for displaying multiple products.
+│   ├── context/                    # React context providers for global state
+│   │   ├── AuthContext.tsx         # Authentication state, login/register/logout logic.
+│   │   └── CartContext.tsx         # Cart state, add/remove/update/clear cart logic.
+│   ├── pages/                      # All main pages (routed views)
+│   │   ├── Admin/
+│   │   │   ├── Dashboard.tsx           # Admin dashboard: stats for products, orders, users, revenue.
+│   │   │   ├── OrdersManagement.tsx    # Admin: view and update all orders, change status.
+│   │   │   ├── ProductsManagement.tsx  # Admin: add/edit/delete products, image upload.
+│   │   │   └── UsersManagement.tsx     # Admin: view users, assign roles.
+│   │   ├── Auth/
+│   │   │   ├── ForgotPassword.tsx      # Start password reset, send OTP to email.
+│   │   │   ├── Login.tsx               # User login form.
+│   │   │   ├── Register.tsx            # User registration form.
+│   │   │   ├── ResetPassword.tsx       # Set new password after OTP verification.
+│   │   │   └── VerifyOtp.tsx           # Enter OTP sent to email for password reset.
+│   │   └── User/
+│   │       ├── Cart.tsx                # User's shopping cart page.
+│   │       ├── Checkout.tsx            # Checkout form, payment method selection.
+│   │       ├── Home.tsx                # Home page, product listing and search.
+│   │       ├── OrderConfirmation.tsx   # Order confirmation and summary after checkout.
+│   │       ├── Orders.tsx              # User's order history and status.
+│   │       ├── ProductDetails.tsx      # Detailed view of a single product.
+│   │       └── Profile.tsx             # User profile, view and edit shipping address.
 │   ├── services/
-│   │   └── api.ts             # API calls (auth, products, cart, orders)
+│   │   └── api.ts                  # All API calls (auth, products, cart, orders, admin, chatbot). Uses Axios.
 │   └── types/
-│       └── index.ts           # TypeScript interfaces for data models
-├── package.json               # Project dependencies and scripts
-├── tailwind.config.js         # Tailwind CSS config
-├── postcss.config.js          # PostCSS config
-├── vite.config.ts             # Vite config
-├── tsconfig*.json             # TypeScript configs
-└── eslint.config.js           # ESLint config
+│       └── index.ts                # TypeScript interfaces for all data models (User, Product, Order, etc.)
+├── package.json                    # Project dependencies, scripts, and metadata.
+├── tailwind.config.js              # Tailwind CSS configuration.
+├── postcss.config.js               # PostCSS configuration for Tailwind and autoprefixer.
+├── vite.config.ts                  # Vite build and dev server configuration.
+├── tsconfig.json                   # Base TypeScript configuration.
+├── tsconfig.app.json               # TypeScript config for app source files.
+├── tsconfig.node.json              # TypeScript config for node scripts/configs.
+├── eslint.config.js                # ESLint configuration for linting code.
+├── index.html                      # Main HTML entry point for the app.
+└── .gitignore                      # Files and folders to ignore in git.
 ```
 
 ## Main Features & Workflow
@@ -116,6 +144,93 @@ This is a modern e-commerce frontend built with React, TypeScript, Vite, and Tai
    npm run lint
    ```
 
+
+## API Requests & Responses
+
+All data is fetched and updated via REST APIs defined in `src/services/api.ts`. Axios is used for HTTP requests, with interceptors for authentication and error handling.
+
+**Base URL:** `http://localhost:5000/api`
+
+### Authentication
+- **Login**
+   - Request: `POST /auth/login` `{ email, password }`
+   - Response: `{ user: { ...userFields }, token: "..." }`
+- **Register**
+   - Request: `POST /auth/register` `{ name, email, password }`
+   - Response: `{ user: { ...userFields }, token: "..." }`
+- **Forgot Password**
+   - Request: `POST /auth/forgot-password` `{ email }`
+   - Response: `{ message: "OTP sent" }`
+- **Verify OTP**
+   - Request: `POST /auth/verify-otp` `{ email, otp }`
+   - Response: `{ message: "OTP verified" }`
+- **Reset Password**
+   - Request: `POST /auth/reset-password` `{ email, newPassword }`
+   - Response: `{ message: "Password reset successful" }`
+
+### Products
+- **Get Products**
+   - Request: `GET /products?q=search&page=1&limit=20`
+   - Response: `{ products: [ { id, name, price, ... } ] }`
+- **Get Product Details**
+   - Request: `GET /products/:id`
+   - Response: `{ product: { id, name, price, ... } }`
+
+### Cart
+- **Get Cart**
+   - Request: `GET /cart`
+   - Response: `{ cart: [ { product_id, name, price, quantity, ... } ] }`
+- **Add to Cart**
+   - Request: `POST /cart/add` `{ product_id, quantity }`
+   - Response: `{ cart: [ ... ] }`
+- **Remove from Cart**
+   - Request: `POST /cart/remove` `{ product_id }`
+   - Response: `{ cart: [ ... ] }`
+
+### Orders
+- **Create Order**
+   - Request: `POST /orders` `{ shipping_name, shipping_mobile, ... }`
+   - Response: `{ order: { id, ... }, items: [ ... ] }`
+- **Get Orders**
+   - Request: `GET /orders`
+   - Response: `{ orders: [ { id, total, status, ... } ] }`
+- **Get Order Details**
+   - Request: `GET /orders/:id`
+   - Response: `{ order: { ... }, items: [ ... ] }`
+- **Cancel Order**
+   - Request: `PATCH /orders/:id/cancel`
+   - Response: `{ order: { ... } }`
+
+### Admin APIs
+- **Create Product**
+   - Request: `POST /admin/products` (multipart/form-data)
+   - Response: `{ product: { ... } }`
+- **Update Product**
+   - Request: `PUT /admin/products/:id` (multipart/form-data)
+   - Response: `{ product: { ... } }`
+- **Delete Product**
+   - Request: `DELETE /admin/products/:id`
+   - Response: `{ message: "Product deleted" }`
+- **Get All Orders**
+   - Request: `GET /admin/orders`
+   - Response: `{ orders: [ ... ] }`
+- **Update Order Status**
+   - Request: `PATCH /admin/orders/:id/status` `{ status }`
+   - Response: `{ order: { ... } }`
+- **Get Users**
+   - Request: `GET /admin/users`
+   - Response: `{ users: [ ... ] }`
+- **Update User Role**
+   - Request: `PATCH /admin/users/:id/role` `{ role }`
+   - Response: `{ user: { ... } }`
+
+### Chatbot
+- **Send Message**
+   - Request: `POST /chatbot/message` `{ message }`
+   - Response: `{ reply: "..." }`
+
+---
+
 ## Environment
 - Requires Node.js and npm.
 - Backend API should be running at `http://localhost:5000/api`.
@@ -124,4 +239,4 @@ This is a modern e-commerce frontend built with React, TypeScript, Vite, and Tai
 MIT
 
 ---
-This README provides a complete overview of the codebase, its structure, and workflow. For more details, refer to the comments in each file and explore the codebase.
+This README provides a complete overview of the codebase, its structure, workflow, and API contracts. For more details, refer to the comments in each file and explore the codebase.
