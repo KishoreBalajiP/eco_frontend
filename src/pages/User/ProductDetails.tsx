@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 import { useParams } from 'react-router-dom';
 import { ShoppingCart, Package } from 'lucide-react';
 import { productsAPI } from '../../services/api';
@@ -37,9 +38,11 @@ const ProductDetails: React.FC = () => {
     
     try {
       await addToCart(product.id, quantity);
-      alert('Product added to cart!');
+      // alert('Product added to cart!');
+    toast.success('Product added to cart!');
     } catch (error: any) {
-      alert(error.message || 'Failed to add to cart');
+      // alert(error.message || 'Failed to add to cart');
+    toast.error(error.message || 'Failed to add to cart');
     }
   };
 

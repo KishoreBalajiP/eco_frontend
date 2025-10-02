@@ -1,5 +1,6 @@
 // src/pages/Admin/OrdersManagement.tsx
 import React, { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 import { Search, Eye, X } from 'lucide-react';
 import { adminAPI } from '../../services/api';
 import { Order, OrderItem } from '../../types';
@@ -45,7 +46,8 @@ const OrdersManagement: React.FC = () => {
     try {
       const order = orders.find(o => o.id === orderId);
       if (order?.status === 'cancelled') {
-        alert('Cancelled orders cannot be updated');
+        // alert('Cancelled orders cannot be updated');
+    toast.warn('Cancelled orders cannot be updated');
         return;
       }
 
@@ -53,7 +55,8 @@ const OrdersManagement: React.FC = () => {
       fetchOrders();
     } catch (error) {
       console.error('Failed to update order status:', error);
-      alert('Failed to update order status');
+      // alert('Failed to update order status');
+    toast.error('Failed to update order status');
     }
   };
 
@@ -79,7 +82,8 @@ const OrdersManagement: React.FC = () => {
       setIsModalOpen(true);
     } catch (err) {
       console.error('Failed to fetch order details:', err);
-      alert('Cannot fetch order details');
+      // alert('Cannot fetch order details');
+    toast.error('Cannot fetch order details');
     }
   };
 

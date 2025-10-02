@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 import { Search, Shield, User } from 'lucide-react';
 import { adminAPI } from '../../services/api';
 import { User as UserType } from '../../types';
@@ -39,7 +40,8 @@ const UsersManagement: React.FC = () => {
       fetchUsers();
     } catch (error) {
       console.error('Failed to update user role:', error);
-      alert('Failed to update user role');
+      // alert('Failed to update user role');
+    toast.error('Failed to update user role');
     }
   };
 

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
 import { productsAPI, adminAPI } from '../../services/api';
 import { Product } from '../../types';
@@ -71,7 +72,8 @@ const ProductsManagement: React.FC = () => {
       fetchProducts();
     } catch (error) {
       console.error('Failed to save product:', error);
-      alert('Failed to save product');
+      // alert('Failed to save product');
+    toast.error('Failed to save product');
     }
   };
 
@@ -94,7 +96,8 @@ const ProductsManagement: React.FC = () => {
         fetchProducts();
       } catch (error) {
         console.error('Failed to delete product:', error);
-        alert('Failed to delete product');
+        // alert('Failed to delete product');
+    toast.error('Failed to delete product');
       }
     }
   };

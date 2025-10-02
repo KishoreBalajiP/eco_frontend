@@ -1,4 +1,6 @@
 import React from "react";
+import { ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
@@ -43,7 +45,7 @@ const AppContent: React.FC = () => {
   const isAdmin = user?.role === "admin";
 
   return (
-    <div className="min-h-screen bg-gray-50">
+     <div className="min-h-screen bg-gray-50">
       {isAdmin ? (
         <div className="flex">
           <AdminSidebar />
@@ -144,6 +146,7 @@ const AppContent: React.FC = () => {
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick pauseOnFocusLoss draggable pauseOnHover />
         </>
       )}
     </div>

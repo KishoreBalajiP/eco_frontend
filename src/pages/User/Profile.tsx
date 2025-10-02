@@ -1,5 +1,6 @@
 // src/pages/User/Profile.tsx
 import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
 
@@ -52,11 +53,13 @@ const Profile: React.FC = () => {
     setLoading(true);
     try {
       await api.put("/users/me/shipping", shipping);
-      alert("Shipping info updated successfully");
+      // alert("Shipping info updated successfully");
+  toast.success("Shipping info updated successfully");
       setEditing(false);
     } catch (err) {
       console.error(err);
-      alert("Failed to update shipping info");
+      // alert("Failed to update shipping info");
+  toast.error("Failed to update shipping info");
     } finally {
       setLoading(false);
     }

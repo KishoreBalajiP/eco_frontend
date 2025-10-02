@@ -1,5 +1,6 @@
 // src/pages/User/Checkout.tsx
 import React, { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { ordersAPI } from '../../services/api';
@@ -32,14 +33,16 @@ const Checkout: React.FC = () => {
           !data.shipping_postal_code ||
           !data.shipping_country
         ) {
-          alert('Please add your shipping address first.');
+          // alert('Please add your shipping address first.');
+            toast.warn('Please add your shipping address first.');
           navigate('/profile');
         } else {
           setShipping(data);
         }
       } catch (err) {
         console.error('Failed to fetch shipping info', err);
-        alert('Please add your shipping address first.');
+        // alert('Please add your shipping address first.');
+    toast.warn('Please add your shipping address first.');
         navigate('/profile');
       }
     };
@@ -82,7 +85,8 @@ const Checkout: React.FC = () => {
       });
     } catch (err) {
       console.error('Checkout failed', err);
-      alert('Checkout failed. Please try again.');
+      // alert('Checkout failed. Please try again.');
+    toast.error('Checkout failed. Please try again.');
     } finally {
       setLoading(false);
     }

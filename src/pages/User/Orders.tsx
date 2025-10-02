@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import { Package, Clock, Truck, CheckCircle } from "lucide-react";
 import { ordersAPI } from "../../services/api";
 import { Order, OrderItem } from "../../types";
@@ -72,10 +73,12 @@ const Orders: React.FC = () => {
       setOrders(prev =>
         prev.map(o => (o.id === orderId ? { ...o, status: "cancelled" } : o))
       );
-      alert("Order cancelled successfully!");
+      // alert("Order cancelled successfully!");
+    toast.success("Order cancelled successfully!");
     } catch (err) {
       console.error(err);
-      alert("Failed to cancel order.");
+      // alert("Failed to cancel order.");
+    toast.error("Failed to cancel order.");
     } finally {
       setProcessingOrderId(null); // reset processing state
     }
