@@ -11,6 +11,7 @@ const ProductsManagement: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [deleteProductId, setDeleteProductId] = useState<number | null>(null);
   const [formData, setFormData] = useState<{
     name: string;
     price: string;
@@ -39,11 +40,13 @@ const ProductsManagement: React.FC = () => {
   }, [products, searchQuery]);
 
   const fetchProducts = async () => {
+    setLoading(true); // ensure loading is true while fetching
     try {
       const response = await productsAPI.getProducts('', 1, 1000);
       setProducts(response.products || []);
     } catch (error) {
       console.error('Failed to fetch products:', error);
+      toast.error('Failed to fetch products');
     } finally {
       setLoading(false);
     }
@@ -60,20 +63,25 @@ const ProductsManagement: React.FC = () => {
     if (formData.image) form.append('image', formData.image);
 
     try {
+      let successMsg = '';
       if (editingProduct) {
         await adminAPI.updateProduct(editingProduct.id, form);
+        successMsg = 'Product updated successfully';
       } else {
         await adminAPI.createProduct(form);
+        successMsg = 'Product added successfully';
       }
 
       setShowModal(false);
       setEditingProduct(null);
       resetForm();
       fetchProducts();
-    } catch (error) {
+
+      toast.success(successMsg); // show success toast immediately
+    } catch (error: any) {
       console.error('Failed to save product:', error);
-      // alert('Failed to save product');
-    toast.error('Failed to save product');
+      setShowModal(false);
+      toast.error('Failed to save product');
     }
   };
 
@@ -89,17 +97,26 @@ const ProductsManagement: React.FC = () => {
     setShowModal(true);
   };
 
-  const handleDelete = async (id: number) => {
-    if (confirm('Are you sure you want to delete this product?')) {
-      try {
-        await adminAPI.deleteProduct(id);
-        fetchProducts();
-      } catch (error) {
-        console.error('Failed to delete product:', error);
-        // alert('Failed to delete product');
-    toast.error('Failed to delete product');
-      }
+  const handleDelete = (id: number) => {
+    setDeleteProductId(id);
+  };
+
+  const confirmDelete = async () => {
+    if (deleteProductId === null) return;
+    try {
+      await adminAPI.deleteProduct(deleteProductId);
+      fetchProducts();
+      toast.success('Product deleted successfully');
+    } catch (error: any) {
+      console.error('Failed to delete product:', error);
+      toast.error(error?.response?.data?.message || error?.message || 'Failed to delete product');
+    } finally {
+      setDeleteProductId(null);
     }
+  };
+
+  const cancelDelete = () => {
+    setDeleteProductId(null);
   };
 
   const resetForm = () => {
@@ -169,7 +186,6 @@ const ProductsManagement: React.FC = () => {
               <tr key={product.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
-                    {/* Updated image property */}
                     <img
                       src={product.image_url || 'https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg?auto=compress&cs=tinysrgb&w=100'}
                       alt={product.name}
@@ -208,7 +224,7 @@ const ProductsManagement: React.FC = () => {
           <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
             <h2 className="text-lg font-semibold text-gray-900 mb-6">{editingProduct ? 'Edit Product' : 'Add New Product'}</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Form fields remain unchanged */}
+              {/* Form fields */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
                 <input
@@ -274,6 +290,30 @@ const ProductsManagement: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteProductId !== null && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <h2 className="text-lg font-semibold text-gray-900 mb-6">Confirm Delete</h2>
+            <p>Are you sure you want to delete this product?</p>
+            <div className="flex justify-end space-x-3 pt-6">
+              <button
+                onClick={cancelDelete}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -45,7 +45,21 @@ const AppContent: React.FC = () => {
   const isAdmin = user?.role === "admin";
 
   return (
-     <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
+      {/* Toast container always available for both admin and user pages */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        style={{ zIndex: 9999 }}
+      />
+
       {isAdmin ? (
         <div className="flex">
           <AdminSidebar />
@@ -146,7 +160,6 @@ const AppContent: React.FC = () => {
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-          <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick pauseOnFocusLoss draggable pauseOnHover />
         </>
       )}
     </div>
