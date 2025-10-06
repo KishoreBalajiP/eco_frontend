@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Package, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { authAPI } from '../../services/api';
 
 const Register: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -10,30 +11,43 @@ const Register: React.FC = () => {
     password: '',
   });
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const { register, user } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
-  // 🔑 Independent states for password visibility
+  // Password visibility states
   const [showPasswordByEye, setShowPasswordByEye] = useState(false);
   const [showPasswordByCheckbox, setShowPasswordByCheckbox] = useState(false);
-
   const isPasswordVisible = showPasswordByEye || showPasswordByCheckbox;
 
-  React.useEffect(() => {
-    if (user) {
+  useEffect(() => {
+    // Do not auto-redirect if pending registration exists
+    const pending = localStorage.getItem('pendingRegistration');
+    if (user && !pending) {
       navigate(user.role === 'admin' ? '/admin' : '/');
     }
   }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
+    setMessage('');
+    setLoading(true);
+
     try {
-      await register(formData.name, formData.email, formData.password);
-    } catch (error: any) {
-      setError(error.message);
+      // Send registration OTP
+      await authAPI.initiateRegistrationOtp(formData.email);
+      setMessage('OTP sent to your email. Please verify to complete registration.');
+
+      // Save user data for OTP verification step
+      localStorage.setItem('pendingRegistration', JSON.stringify(formData));
+
+      // Redirect to VerifyRegistrationOtp page (ensure your route matches)
+      navigate('/VerifyRegistrationOtp');
+    } catch (err: any) {
+      console.error(err);
+      setError(err.response?.data?.message || 'Failed to send OTP. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -59,6 +73,11 @@ const Register: React.FC = () => {
           {error && (
             <div className="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded">
               {error}
+            </div>
+          )}
+          {message && (
+            <div className="bg-green-50 border border-green-300 text-green-700 px-4 py-3 rounded">
+              {message}
             </div>
           )}
 
@@ -140,7 +159,7 @@ const Register: React.FC = () => {
               disabled={loading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
             >
-              {loading ? 'Creating account...' : 'Sign up'}
+              {loading ? 'Sending OTP...' : 'Sign up'}
             </button>
           </div>
 

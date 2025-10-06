@@ -1,4 +1,4 @@
-// context/AuthContext.tsx
+// src/context/AuthContext.tsx
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, AuthContextType } from '../types';
 import { authAPI } from '../services/api';
@@ -34,6 +34,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(false);
   }, []);
 
+  // ---------------- LOGIN ----------------
   const login = async (email: string, password: string) => {
     try {
       const response = await authAPI.login(email, password);
@@ -49,21 +50,55 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // ---------------- OTP-BASED REGISTRATION ----------------
   const register = async (name: string, email: string, password: string) => {
     try {
-      const response = await authAPI.register(name, email, password);
-      const { token, user } = response;
+      // initiate OTP
+      const response = await authAPI.initiateRegistrationOtp(email);
 
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-      setToken(token);
-      setUser(user);
+      // Save temp registration data for complete step
+      localStorage.setItem('registrationName', name);
+      localStorage.setItem('registrationEmail', email);
+      localStorage.setItem('registrationPassword', password);
+
+      return response; // { success: boolean; message: string }
     } catch (error: any) {
       const message = error.response?.data?.message || 'Unable to create account. Please try again.';
       throw new Error(message);
     }
   };
 
+  const completeRegistration = async () => {
+    try {
+      const name = localStorage.getItem('registrationName') || '';
+      const email = localStorage.getItem('registrationEmail') || '';
+      const password = localStorage.getItem('registrationPassword') || '';
+
+      if (!name || !email || !password) {
+        throw new Error('Registration data missing. Please start again.');
+      }
+
+      const response = await authAPI.completeRegistration(name, email, password);
+      const { token, user } = response;
+
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      setToken(token);
+      setUser(user);
+
+      // Cleanup temporary registration data
+      localStorage.removeItem('registrationName');
+      localStorage.removeItem('registrationEmail');
+      localStorage.removeItem('registrationPassword');
+
+      return { success: true, user };
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Unable to complete registration. Please try again.';
+      throw new Error(message);
+    }
+  };
+
+  // ---------------- LOGOUT ----------------
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -71,11 +106,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
   };
 
-  const value = {
+  const value: AuthContextType = {
     user,
     token,
     login,
     register,
+    completeRegistration,
     logout,
     loading,
   };

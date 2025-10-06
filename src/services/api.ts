@@ -55,6 +55,22 @@ export const authAPI = {
     const response = await api.post("/auth/reset-password", { email, newPassword });
     return response.data;
   },
+
+  // NEW: OTP-based registration flow
+  initiateRegistrationOtp: async (email: string) => {
+    const response = await api.post("/auth/register/initiate", { email });
+    return response.data; // { success: true, message: "OTP sent" }
+  },
+
+  verifyRegistrationOtp: async (email: string, otp: string) => {
+    const response = await api.post("/auth/register/verify", { email, otp });
+    return response.data; // { success: true, message: "OTP verified" }
+  },
+
+  completeRegistration: async (name: string, email: string, password: string) => {
+    const response = await api.post("/auth/register/complete", { name, email, password });
+    return response.data; // { user, token }
+  },
 };
 
 // -------------------- Products APIs --------------------

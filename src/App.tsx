@@ -15,6 +15,7 @@ import Register from "./pages/Auth/Register";
 import ForgotPassword from "./pages/Auth/ForgotPassword";
 import VerifyOtp from "./pages/Auth/VerifyOtp";
 import ResetPassword from "./pages/Auth/ResetPassword";
+import VerifyRegistrationOtp from "./pages/Auth/VerifyRegistrationOtp";
 
 // User Pages
 import Home from "./pages/User/Home";
@@ -111,6 +112,7 @@ const AppContent: React.FC = () => {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/verify-otp" element={<VerifyOtp />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/VerifyRegistrationOtp" element={<VerifyRegistrationOtp />} />
 
             {/* User Routes */}
             <Route path="/" element={<Home />} />

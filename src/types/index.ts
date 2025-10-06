@@ -52,14 +52,18 @@ export interface OrderItem {
   price: number;
 }
 
+// src/types/index.ts
+
 export interface AuthContextType {
   user: User | null;
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<{ success: boolean; message: string }>; // updated to match new register
+  completeRegistration: () => Promise<{ success: boolean; user: User }>; // <-- add this
   logout: () => void;
   loading: boolean;
 }
+
 
 export interface CartContextType {
   cart: CartItem[];
@@ -81,4 +85,9 @@ export interface Shipping {
   shipping_state: string;
   shipping_postal_code: string;
   shipping_country: string;
+}
+// OTP Response Interface
+export interface OtpResponse {
+  success: boolean;
+  message: string;
 }
