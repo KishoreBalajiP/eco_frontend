@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingCart } from 'lucide-react';
+import { toast } from 'react-toastify';
 import { Product } from '../../types';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
@@ -14,13 +15,23 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { user } = useAuth();
 
   const handleAddToCart = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (!user) return;
-    
+    e.preventDefault(); // prevents navigation when clicking the button
+    if (!user) {
+      toast.info('Please log in to add items to your cart.');
+      return;
+    }
+
     try {
       await addToCart(product.id, 1);
-    } catch (error) {
-      console.error('Failed to add to cart:', error);
+      toast.success(`${product.name} added to cart! 🛒`, {
+        position: 'top-right',
+        autoClose: 3000,
+      });
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to add to cart.', {
+        position: 'top-right',
+        autoClose: 3000,
+      });
     }
   };
 
@@ -28,7 +39,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     <Link to={`/products/${product.id}`} className="group">
       <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
         <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden bg-gray-200 xl:aspect-w-7 xl:aspect-h-8">
-          {/* Updated image property */}
           <img
             src={product.image_url || 'https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg?auto=compress&cs=tinysrgb&w=400'}
             alt={product.name}
