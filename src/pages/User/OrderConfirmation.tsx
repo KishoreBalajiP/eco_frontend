@@ -135,6 +135,18 @@ const OrderConfirmation: React.FC = () => {
               </p>
             </div>
           )}
+{/* Policy Notice */}
+<p className="text-xs text-gray-600 mt-4 text-center">
+  By completing this order, you agree to our{' '}
+  <a href="/terms-and-conditions" target="_blank" className="underline">
+    Terms & Conditions
+  </a>{' '}
+  and{' '}
+  <a href="/privacy-policy" target="_blank" className="underline">
+    Privacy Policy
+  </a>.
+</p>
+
         </div>
 
         {/* Actions */}

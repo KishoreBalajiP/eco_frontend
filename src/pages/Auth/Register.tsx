@@ -1,3 +1,4 @@
+// src/pages/Auth/Register.tsx
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Package, Eye, EyeOff } from 'lucide-react';
@@ -21,8 +22,10 @@ const Register: React.FC = () => {
   const [showPasswordByCheckbox, setShowPasswordByCheckbox] = useState(false);
   const isPasswordVisible = showPasswordByEye || showPasswordByCheckbox;
 
+  // Terms & Conditions checkbox state
+  const [agreed, setAgreed] = useState(false);
+
   useEffect(() => {
-    // Do not auto-redirect if pending registration exists
     const pending = localStorage.getItem('pendingRegistration');
     if (user && !pending) {
       navigate(user.role === 'admin' ? '/admin' : '/');
@@ -33,17 +36,17 @@ const Register: React.FC = () => {
     e.preventDefault();
     setError('');
     setMessage('');
-    setLoading(true);
 
+    if (!agreed) {
+      setError('You must agree to the Terms & Conditions and Privacy Policy.');
+      return;
+    }
+
+    setLoading(true);
     try {
-      // Send registration OTP
       await authAPI.initiateRegistrationOtp(formData.email);
       setMessage('OTP sent to your email. Please verify to complete registration.');
-
-      // Save user data for OTP verification step
       localStorage.setItem('pendingRegistration', JSON.stringify(formData));
-
-      // Redirect to VerifyRegistrationOtp page (ensure your route matches)
       navigate('/VerifyRegistrationOtp');
     } catch (err: any) {
       console.error(err);
@@ -153,10 +156,31 @@ const Register: React.FC = () => {
             </div>
           </div>
 
+          {/* Terms & Conditions Checkbox */}
+          <div className="flex items-start mt-2">
+            <input
+              id="terms"
+              type="checkbox"
+              checked={agreed}
+              onChange={() => setAgreed(!agreed)}
+              className="h-4 w-4 text-blue-600 border-gray-300 rounded mt-1"
+            />
+            <label htmlFor="terms" className="ml-2 text-sm text-gray-700">
+              I agree to the{' '}
+              <a href="/terms-and-conditions" target="_blank" className="underline text-blue-600">
+                Terms & Conditions
+              </a>{' '}
+              and{' '}
+              <a href="/privacy-policy" target="_blank" className="underline text-blue-600">
+                Privacy Policy
+              </a>.
+            </label>
+          </div>
+
           <div>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !agreed}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
             >
               {loading ? 'Sending OTP...' : 'Sign up'}

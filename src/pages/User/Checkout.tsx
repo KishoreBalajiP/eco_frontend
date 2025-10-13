@@ -36,7 +36,7 @@ const Checkout: React.FC = () => {
           // alert('Please add your shipping address first.');
             toast.warn('Please add your shipping address first.');
           navigate('/profile');
-        } else {
+        } else {  
           setShipping(data);
         }
       } catch (err) {
@@ -192,7 +192,17 @@ const Checkout: React.FC = () => {
                 </div>
               </div>
             </div>
-
+{/* Policy Notice */}
+  <p className="text-xs text-gray-600 mt-2">
+    By placing your order, you agree to our{' '}
+    <a href="/terms-and-conditions" target="_blank" className="underline">
+      Terms & Conditions
+    </a>{' '}
+    and{' '}
+    <a href="/privacy-policy" target="_blank" className="underline">
+      Privacy Policy
+    </a>.
+  </p>               
             <button
               onClick={handleCheckout}
               disabled={loading || cart.length === 0}
