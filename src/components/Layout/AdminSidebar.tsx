@@ -15,19 +15,32 @@ const AdminSidebar: React.FC = () => {
   ];
 
   const isActive = (path: string) => {
-    if (path === '/admin') return location.pathname === path;
+    if (path === '/admin') {
+      return location.pathname === path;
+    }
     return location.pathname.startsWith(path);
   };
 
   return (
-    <div className="flex flex-col w-64 bg-gray-900 text-white min-h-screen">
+    <div className="bg-gray-900 text-white w-64 min-h-screen flex flex-col">
+      {/* Logout Button at the top */}
+      <div className="p-4">
+        <button
+          onClick={logout}
+          className="flex items-center w-full px-4 py-3 text-sm text-gray-300 hover:bg-gray-800 rounded-lg transition-colors mb-4"
+        >
+          <LogOut className="mr-3 h-5 w-5" />
+          Logout
+        </button>
+      </div>
+
       {/* Header */}
       <div className="p-6">
         <h1 className="text-xl font-bold">Admin Panel</h1>
       </div>
 
-      {/* Navigation - scrollable */}
-      <div className="flex-1 overflow-y-auto px-4 space-y-2">
+      {/* Navigation */}
+      <nav className="flex-1 px-4 space-y-2 overflow-y-auto">
         {navigation.map((item) => {
           const Icon = item.icon;
           return (
@@ -45,18 +58,7 @@ const AdminSidebar: React.FC = () => {
             </Link>
           );
         })}
-      </div>
-
-      {/* Footer / Logout - always visible */}
-      <div className="p-6">
-        <button
-          onClick={logout}
-          className="flex items-center w-full px-6 py-5 text-lg font-semibold text-gray-200 hover:bg-gray-800 rounded-lg transition-colors"
-        >
-          <LogOut className="mr-4 h-7 w-7" />
-          Logout
-        </button>
-      </div>
+      </nav>
     </div>
   );
 };
