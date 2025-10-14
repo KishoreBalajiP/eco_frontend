@@ -3,14 +3,14 @@ export default function ContactUs() {
     <div className="max-w-6xl mx-auto px-6 py-12 bg-gray-50 rounded-lg shadow-md">
       <h1 className="text-3xl font-bold mb-6 text-gray-900">Contact Us</h1>
       <p className="mb-4 text-gray-700">
-        We’re here to help! Reach out for any questions related to orders, products, or policies.
+        We're here to help! Reach out for any questions related to orders, products, or policies.
       </p>
 
       <h2 className="text-xl font-semibold mt-6 mb-2 text-gray-900">Email Support</h2>
       <p className="mb-4 text-gray-700">
         Email us at{" "}
-        <a href="mailto:support@jayastores.com" className="text-blue-600 underline">
-          contactjayastores.gmail.com
+        <a href="mailto:contactjayastores@gmail.com" className="text-blue-600 underline">
+          contactjayastores@gmail.com
         </a>{" "}
         for any queries. Response time is typically 24–48 hours.
       </p>
@@ -28,7 +28,7 @@ export default function ContactUs() {
       <p className="mb-4 text-gray-700">
         Jaya Stores,<br />
         168/3 Bajanai Kovil Street, Theetalam,<br />
-        Chengalpattu, TamilNadu, India – 603406
+        Chengalpattu, TamilNadu, India - 603406
       </p>
     </div>
   );
