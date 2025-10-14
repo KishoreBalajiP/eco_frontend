@@ -6,9 +6,9 @@ import { useCart } from '../../context/CartContext';
 import { ordersAPI } from '../../services/api';
 import api from '../../services/api';
 import { Shipping, CartItem } from '../../types';
-import { Truck, CreditCard, Smartphone } from 'lucide-react';
+import { Truck, Smartphone } from 'lucide-react';
 
-type PaymentMethod = 'cod' | 'upi' | 'card' | 'razorpay';
+type PaymentMethod = 'cod' | 'upi';
 
 const Checkout: React.FC = () => {
   const { cart, total, clearCart } = useCart();
@@ -33,16 +33,14 @@ const Checkout: React.FC = () => {
           !data.shipping_postal_code ||
           !data.shipping_country
         ) {
-          // alert('Please add your shipping address first.');
-            toast.warn('Please add your shipping address first.');
+          toast.warn('Please add your shipping address first.');
           navigate('/profile');
-        } else {  
+        } else {
           setShipping(data);
         }
       } catch (err) {
         console.error('Failed to fetch shipping info', err);
-        // alert('Please add your shipping address first.');
-    toast.warn('Please add your shipping address first.');
+        toast.warn('Please add your shipping address first.');
         navigate('/profile');
       }
     };
@@ -57,7 +55,6 @@ const Checkout: React.FC = () => {
     try {
       const response = await ordersAPI.createOrder(shipping);
 
-      // Prepare cart items for confirmation page
       const itemsForConfirmation: CartItem[] = cart.map(item => ({
         product_id: item.product_id,
         name: item.name,
@@ -66,13 +63,9 @@ const Checkout: React.FC = () => {
         image_url: item.image_url,
       }));
 
-      // Prevent flash
       setOrderCreated(true);
-
-      // Clear cart after marking order created
       clearCart();
 
-      // Navigate to confirmation
       navigate(`/order-confirmation/${response.order.id}`, {
         state: {
           paymentMethod,
@@ -85,14 +78,12 @@ const Checkout: React.FC = () => {
       });
     } catch (err) {
       console.error('Checkout failed', err);
-      // alert('Checkout failed. Please try again.');
-    toast.error('Checkout failed. Please try again.');
+      toast.error('Checkout failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Prevent rendering after order creation to avoid flash
   if (!shipping || orderCreated) return null;
 
   return (
@@ -126,7 +117,8 @@ const Checkout: React.FC = () => {
               <p>{shipping.shipping_name}</p>
               <p>{shipping.shipping_mobile}</p>
               <p>
-                {shipping.shipping_line1}{shipping.shipping_line2 ? `, ${shipping.shipping_line2}` : ''}, {shipping.shipping_city}, {shipping.shipping_state}, {shipping.shipping_postal_code}, {shipping.shipping_country}
+                {shipping.shipping_line1}
+                {shipping.shipping_line2 ? `, ${shipping.shipping_line2}` : ''}, {shipping.shipping_city}, {shipping.shipping_state}, {shipping.shipping_postal_code}, {shipping.shipping_country}
               </p>
             </div>
 
@@ -174,35 +166,21 @@ const Checkout: React.FC = () => {
                     />
                   )}
                 </div>
-
-                {/* Card */}
-                <div className="border rounded-lg p-3">
-                  <label className="flex items-center cursor-pointer">
-                    <input
-                      type="radio"
-                      name="payment"
-                      value="razorpay"
-                      checked={paymentMethod === 'razorpay'}
-                      onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                      className="mr-3"
-                    />
-                    <CreditCard className="h-5 w-5 mr-2 text-gray-600" />
-                    <span>Card Payment (Razorpay)</span>
-                  </label>
-                </div>
               </div>
             </div>
-{/* Policy Notice */}
-  <p className="text-xs text-gray-600 mt-2">
-    By placing your order, you agree to our{' '}
-    <a href="/terms-and-conditions" target="_blank" className="underline">
-      Terms & Conditions
-    </a>{' '}
-    and{' '}
-    <a href="/privacy-policy" target="_blank" className="underline">
-      Privacy Policy
-    </a>.
-  </p>               
+
+            {/* Policy Notice */}
+            <p className="text-xs text-gray-600 mt-2">
+              By placing your order, you agree to our{' '}
+              <a href="/terms-and-conditions" target="_blank" className="underline">
+                Terms & Conditions
+              </a>{' '}
+              and{' '}
+              <a href="/privacy-policy" target="_blank" className="underline">
+                Privacy Policy
+              </a>.
+            </p>
+
             <button
               onClick={handleCheckout}
               disabled={loading || cart.length === 0}
