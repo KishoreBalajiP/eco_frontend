@@ -1,12 +1,15 @@
 import { ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import { useAuth } from "./context/AuthContext";
 import Navbar from "./components/Layout/Navbar";
 import AdminSidebar from "./components/Layout/AdminSidebar";
 import ProtectedRoute from "./components/Common/ProtectedRoute";
+
+// Added import for animations
+import { AnimatePresence, motion } from "framer-motion";
 
 // Auth Pages
 import Login from "./pages/Auth/Login";
@@ -43,6 +46,7 @@ import Footer from "./components/Layout/Footer";
 
 const AppContent: React.FC = () => {
   const { user, loading } = useAuth();
+  const location = useLocation(); // Added for AnimatePresence
 
   if (loading) {
     return (
@@ -73,13 +77,78 @@ const AppContent: React.FC = () => {
         <div className="flex flex-1 min-h-screen">
           <AdminSidebar />
           <div className="flex-1 p-4 flex flex-col">
-            <Routes>
-              <Route path="/admin" element={<ProtectedRoute adminOnly><Dashboard /></ProtectedRoute>} />
-              <Route path="/admin/products" element={<ProtectedRoute adminOnly><ProductsManagement /></ProtectedRoute>} />
-              <Route path="/admin/orders" element={<ProtectedRoute adminOnly><OrdersManagement /></ProtectedRoute>} />
-              <Route path="/admin/users" element={<ProtectedRoute adminOnly><UsersManagement /></ProtectedRoute>} />
-              <Route path="*" element={<Navigate to="/admin" replace />} />
-            </Routes>
+
+            {/* Animation wrapper added here */}
+            <AnimatePresence mode="wait">
+              <Routes location={location} key={location.pathname}>
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute adminOnly>
+                      <motion.div
+                        key="admin-dashboard"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <Dashboard />
+                      </motion.div>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/products"
+                  element={
+                    <ProtectedRoute adminOnly>
+                      <motion.div
+                        key="admin-products"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <ProductsManagement />
+                      </motion.div>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/orders"
+                  element={
+                    <ProtectedRoute adminOnly>
+                      <motion.div
+                        key="admin-orders"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <OrdersManagement />
+                      </motion.div>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/users"
+                  element={
+                    <ProtectedRoute adminOnly>
+                      <motion.div
+                        key="admin-users"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <UsersManagement />
+                      </motion.div>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="*" element={<Navigate to="/admin" replace />} />
+              </Routes>
+            </AnimatePresence>
+
             {/* Optional: Admin Footer if needed */}
             <Footer />
           </div>
@@ -88,35 +157,39 @@ const AppContent: React.FC = () => {
         <>
           <Navbar />
           <main className="flex-1 flex flex-col">
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/verify-otp" element={<VerifyOtp />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/VerifyRegistrationOtp" element={<VerifyRegistrationOtp />} />
 
-              {/* Legal & Policy Pages */}
-              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-              <Route path="/shipping-policy" element={<ShippingPolicy />} />
-              <Route path="/refund-policy" element={<RefundPolicy />} />
-              <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
-              <Route path="/contact-us" element={<ContactUs />} />
+            {/* Animation wrapper for user routes */}
+            <AnimatePresence mode="wait">
+              <Routes location={location} key={location.pathname}>
+                {/* Public Routes */}
+                <Route path="/login" element={<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Login /></motion.div>} />
+                <Route path="/register" element={<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Register /></motion.div>} />
+                <Route path="/forgot-password" element={<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><ForgotPassword /></motion.div>} />
+                <Route path="/verify-otp" element={<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><VerifyOtp /></motion.div>} />
+                <Route path="/reset-password" element={<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><ResetPassword /></motion.div>} />
+                <Route path="/VerifyRegistrationOtp" element={<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><VerifyRegistrationOtp /></motion.div>} />
 
-              {/* User Routes */}
-              <Route path="/" element={<Home />} />
-              <Route path="/products/:id" element={<ProductDetails />} />
+                {/* Legal & Policy Pages */}
+                <Route path="/privacy-policy" element={<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><PrivacyPolicy /></motion.div>} />
+                <Route path="/shipping-policy" element={<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><ShippingPolicy /></motion.div>} />
+                <Route path="/refund-policy" element={<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><RefundPolicy /></motion.div>} />
+                <Route path="/terms-and-conditions" element={<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><TermsAndConditions /></motion.div>} />
+                <Route path="/contact-us" element={<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><ContactUs /></motion.div>} />
 
-              {/* Protected User Routes */}
-              <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
-              <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
-              <Route path="/order-confirmation/:orderId" element={<ProtectedRoute><OrderConfirmation /></ProtectedRoute>} />
-              <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
-              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                {/* User Routes */}
+                <Route path="/" element={<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Home /></motion.div>} />
+                <Route path="/products/:id" element={<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><ProductDetails /></motion.div>} />
 
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+                {/* Protected User Routes */}
+                <Route path="/cart" element={<ProtectedRoute><motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Cart /></motion.div></ProtectedRoute>} />
+                <Route path="/checkout" element={<ProtectedRoute><motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Checkout /></motion.div></ProtectedRoute>} />
+                <Route path="/order-confirmation/:orderId" element={<ProtectedRoute><motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><OrderConfirmation /></motion.div></ProtectedRoute>} />
+                <Route path="/orders" element={<ProtectedRoute><motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Orders /></motion.div></ProtectedRoute>} />
+                <Route path="/profile" element={<ProtectedRoute><motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Profile /></motion.div></ProtectedRoute>} />
+
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </AnimatePresence>
           </main>
 
           {/* Footer always visible at bottom */}

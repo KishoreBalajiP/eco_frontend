@@ -7,6 +7,7 @@ import { ordersAPI } from '../../services/api';
 import api from '../../services/api';
 import { Shipping, CartItem } from '../../types';
 import { Truck, Smartphone } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type PaymentMethod = 'cod' | 'upi';
 
@@ -19,7 +20,6 @@ const Checkout: React.FC = () => {
   const [upiTransactionId, setUpiTransactionId] = useState('');
   const [orderCreated, setOrderCreated] = useState(false); // Prevent flash
 
-  // Fetch shipping info from backend
   useEffect(() => {
     const fetchShipping = async () => {
       try {
@@ -88,12 +88,22 @@ const Checkout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="max-w-4xl w-full bg-white rounded-lg shadow-md p-8">
+      <motion.div
+        className="max-w-4xl w-full bg-white rounded-lg shadow-md p-8"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4 }}
+      >
         <h1 className="text-2xl font-bold text-gray-900 mb-6">Checkout</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Order Summary */}
-          <div className="bg-white rounded-lg shadow p-6">
+          <motion.div
+            className="bg-white rounded-lg shadow p-6"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+          >
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h2>
             <div className="space-y-3 mb-4">
               {cart.map((item) => (
@@ -107,10 +117,15 @@ const Checkout: React.FC = () => {
               <span>Total</span>
               <span>₹{total}</span>
             </div>
-          </div>
+          </motion.div>
 
           {/* Payment & Shipping */}
-          <div className="bg-white rounded-lg shadow p-6 space-y-6">
+          <motion.div
+            className="bg-white rounded-lg shadow p-6 space-y-6"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+          >
             {/* Shipping Info */}
             <div>
               <h2 className="text-lg font-semibold text-gray-900 mb-2">Shipping To</h2>
@@ -156,15 +171,22 @@ const Checkout: React.FC = () => {
                     <Smartphone className="h-5 w-5 mr-2 text-gray-600" />
                     <span>UPI Payment</span>
                   </label>
-                  {paymentMethod === 'upi' && (
-                    <input
-                      type="text"
-                      placeholder="Enter transaction ID"
-                      value={upiTransactionId}
-                      onChange={(e) => setUpiTransactionId(e.target.value)}
-                      className="w-full p-2 border border-gray-300 rounded mt-2"
-                    />
-                  )}
+                  <AnimatePresence>
+                    {paymentMethod === 'upi' && (
+                      <motion.input
+                        key="upi-input"
+                        type="text"
+                        placeholder="Enter transaction ID"
+                        value={upiTransactionId}
+                        onChange={(e) => setUpiTransactionId(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded mt-2"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.3 }}
+                      />
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
             </div>
@@ -188,9 +210,9 @@ const Checkout: React.FC = () => {
             >
               {loading ? 'Processing...' : 'Complete Order'}
             </button>
-          </div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

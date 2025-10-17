@@ -7,6 +7,7 @@ import { Product } from '../../types';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import Chatbot from '../../components/Chatbot/Chatbot';
+import { motion } from 'framer-motion';
 
 const ProductDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -38,18 +39,16 @@ const ProductDetails: React.FC = () => {
     
     try {
       await addToCart(product.id, quantity);
-      // alert('Product added to cart!');
-    toast.success('Product added to cart!');
+      toast.success('Product added to cart!');
     } catch (error: any) {
-      // alert(error.message || 'Failed to add to cart');
-    toast.error(error.message || 'Failed to add to cart');
+      toast.error(error.message || 'Failed to add to cart');
     }
   };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        <div className="h-32 w-32 border-b-2 border-blue-600 rounded-full opacity-20"></div>
       </div>
     );
   }
@@ -67,9 +66,19 @@ const ProductDetails: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <motion.div
+      className="min-h-screen bg-gray-50"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <motion.div
+          className="bg-white rounded-lg shadow-md overflow-hidden"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+        >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
             {/* Product Image */}
             <div className="aspect-square bg-gray-200 rounded-lg overflow-hidden">
@@ -129,10 +138,10 @@ const ProductDetails: React.FC = () => {
               )}
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
       <Chatbot />
-    </div>
+    </motion.div>
   );
 };
 

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart as CartIcon } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import CartItem from '../../components/Cart/CartItem';
+import { motion } from 'framer-motion';
 
 const Cart: React.FC = () => {
   const { cart, total } = useCart();
@@ -27,14 +28,31 @@ const Cart: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <motion.div
+      className="min-h-screen bg-gray-50"
+      initial={{ opacity: 0, scale: 0.97 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.4 }}
+    >
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-8">Shopping Cart</h1>
         
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <motion.div
+          className="bg-white rounded-lg shadow-md p-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+        >
           <div className="space-y-4">
             {cart.map((item) => (
-              <CartItem key={item.product_id} item={item} />
+              <motion.div
+                key={item.product_id}
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <CartItem item={item} />
+              </motion.div>
             ))}
           </div>
 
@@ -61,9 +79,9 @@ const Cart: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

@@ -25,6 +25,7 @@ const Orders: React.FC = () => {
         setOrders(detailedOrders);
       } catch (error) {
         console.error("Failed to fetch orders:", error);
+        toast.error("Failed to fetch orders.");
       } finally {
         setLoading(false);
       }
@@ -64,7 +65,42 @@ const Orders: React.FC = () => {
   };
 
   const handleCancelOrder = async (orderId: number) => {
-    if (!window.confirm("Are you sure you want to cancel this order?")) return;
+    // Use toast to ask for confirmation instead of alert
+    const confirm = await new Promise<boolean>(resolve => {
+      const id = toast.info(
+        <div className="flex flex-col space-y-2">
+          <span>Are you sure you want to cancel this order?</span>
+          <div className="flex justify-end space-x-2">
+            <button
+              onClick={() => {
+                toast.dismiss(id);
+                resolve(false);
+              }}
+              className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+            >
+              No
+            </button>
+            <button
+              onClick={() => {
+                toast.dismiss(id);
+                resolve(true);
+              }}
+              className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+            >
+              Yes
+            </button>
+          </div>
+        </div>,
+        {
+          autoClose: false,
+          closeOnClick: false,
+          draggable: false,
+          closeButton: false,
+        }
+      );
+    });
+
+    if (!confirm) return;
 
     try {
       setProcessingOrderId(orderId); // mark as processing
@@ -73,14 +109,13 @@ const Orders: React.FC = () => {
       setOrders(prev =>
         prev.map(o => (o.id === orderId ? { ...o, status: "cancelled" } : o))
       );
-      // alert("Order cancelled successfully!");
-    toast.success("Order cancelled successfully!");
+
+      toast.success("Order cancelled successfully!");
     } catch (err) {
       console.error(err);
-      // alert("Failed to cancel order.");
-    toast.error("Failed to cancel order.");
+      toast.error("Failed to cancel order.");
     } finally {
-      setProcessingOrderId(null); // reset processing state
+      setProcessingOrderId(null);
     }
   };
 
@@ -166,7 +201,7 @@ const Orders: React.FC = () => {
                         : "bg-red-500 hover:bg-red-600"
                     }`}
                     onClick={() => handleCancelOrder(order.id)}
-                    disabled={processingOrderId === order.id} // disable while processing
+                    disabled={processingOrderId === order.id}
                   >
                     {processingOrderId === order.id ? "Cancelling..." : "Cancel Order"}
                   </button>

@@ -5,6 +5,9 @@ import { CheckCircle, Package } from 'lucide-react';
 import api from '../../services/api';
 import { Shipping, CartItem } from '../../types';
 
+// Added import for animations
+import { motion } from 'framer-motion';
+
 interface LocationState {
   paymentMethod?: string;
   transactionId?: string;
@@ -65,18 +68,53 @@ const OrderConfirmation: React.FC = () => {
   const { paymentMethod, transactionId, status, shipping, items, total } = orderData;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="max-w-3xl w-full bg-white rounded-lg shadow-md p-8">
-        <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-        <h1 className="text-2xl font-bold text-gray-900 mb-4 text-center">
+    // Animated wrapper for page fade-in
+    <motion.div
+      className="min-h-screen bg-gray-50 flex items-center justify-center p-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.6 }}
+    >
+      <motion.div
+        className="max-w-3xl w-full bg-white rounded-lg shadow-md p-8"
+        initial={{ y: 30, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
+      >
+        {/* Animated success icon */}
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: 'spring', stiffness: 120, damping: 10, delay: 0.2 }}
+        >
+          <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+        </motion.div>
+
+        <motion.h1
+          className="text-2xl font-bold text-gray-900 mb-4 text-center"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+        >
           Order Confirmed!
-        </h1>
-        <p className="text-gray-600 mb-6 text-center">
+        </motion.h1>
+
+        <motion.p
+          className="text-gray-600 mb-6 text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+        >
           Thank you for your order. We've received your order and will process it shortly.
-        </p>
+        </motion.p>
 
         {/* Order Details */}
-        <div className="bg-gray-50 rounded-lg p-4 mb-6">
+        <motion.div
+          className="bg-gray-50 rounded-lg p-4 mb-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+        >
           <h3 className="font-semibold text-gray-900 mb-2 text-lg">Order Details</h3>
           <p className="text-sm text-gray-600">Order ID: #{orderId}</p>
           <p className="text-sm text-gray-600">
@@ -91,7 +129,12 @@ const OrderConfirmation: React.FC = () => {
 
           {/* Items Table */}
           {items && items.length > 0 && (
-            <div className="mt-4 overflow-x-auto">
+            <motion.div
+              className="mt-4 overflow-x-auto"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+            >
               <table className="w-full text-sm text-left border border-gray-200 rounded">
                 <thead className="bg-gray-100">
                   <tr>
@@ -120,12 +163,17 @@ const OrderConfirmation: React.FC = () => {
                   </tr>
                 </tfoot>
               </table>
-            </div>
+            </motion.div>
           )}
 
           {/* Shipping Info */}
           {shipping && (
-            <div className="mt-4">
+            <motion.div
+              className="mt-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.7 }}
+            >
               <h4 className="font-semibold text-gray-900 mb-1 text-lg">Shipping Address</h4>
               <p className="text-sm text-gray-600">{shipping.shipping_name}</p>
               <p className="text-sm text-gray-600">{shipping.shipping_mobile}</p>
@@ -133,24 +181,34 @@ const OrderConfirmation: React.FC = () => {
                 {shipping.shipping_line1}
                 {shipping.shipping_line2 ? `, ${shipping.shipping_line2}` : ''}, {shipping.shipping_city}, {shipping.shipping_state}, {shipping.shipping_postal_code}, {shipping.shipping_country}
               </p>
-            </div>
+            </motion.div>
           )}
-{/* Policy Notice */}
-<p className="text-xs text-gray-600 mt-4 text-center">
-  By completing this order, you agree to our{' '}
-  <a href="/terms-and-conditions" target="_blank" className="underline">
-    Terms & Conditions
-  </a>{' '}
-  and{' '}
-  <a href="/privacy-policy" target="_blank" className="underline">
-    Privacy Policy
-  </a>.
-</p>
 
-        </div>
+          {/* Policy Notice */}
+          <motion.p
+            className="text-xs text-gray-600 mt-4 text-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.8 }}
+          >
+            By completing this order, you agree to our{' '}
+            <a href="/terms-and-conditions" target="_blank" className="underline">
+              Terms & Conditions
+            </a>{' '}
+            and{' '}
+            <a href="/privacy-policy" target="_blank" className="underline">
+              Privacy Policy
+            </a>.
+          </motion.p>
+        </motion.div>
 
         {/* Actions */}
-        <div className="flex flex-col lg:flex-row gap-4">
+        <motion.div
+          className="flex flex-col lg:flex-row gap-4"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.9 }}
+        >
           <Link
             to="/orders"
             className="flex-1 flex items-center justify-center bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
@@ -165,9 +223,9 @@ const OrderConfirmation: React.FC = () => {
           >
             Continue Shopping
           </Link>
-        </div>
-      </div>
-    </div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 };
 

@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, ShoppingCart, User, LogOut, Package } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -14,21 +15,16 @@ const Navbar: React.FC = () => {
 
   const cartItemsCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  // Initialize searchQuery from URL if exists
   useEffect(() => {
     const q = searchParams.get('q') || '';
     setSearchQuery(q);
   }, [searchParams]);
 
-  // Debounced live search: update URL query without navigating
   useEffect(() => {
     const delay = setTimeout(() => {
       const trimmedQuery = searchQuery.trim();
-      if (trimmedQuery) {
-        setSearchParams({ q: trimmedQuery });
-      } else {
-        setSearchParams({}); // removes query from URL
-      }
+      if (trimmedQuery) setSearchParams({ q: trimmedQuery });
+      else setSearchParams({});
     }, 300);
 
     return () => clearTimeout(delay);
@@ -85,31 +81,39 @@ const Navbar: React.FC = () => {
                     <span className="hidden sm:block">{user.name}</span>
                   </button>
 
-                  {showUserMenu && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 border border-gray-200">
-                      <Link
-                        to="/profile"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        onClick={() => setShowUserMenu(false)}
+                  <AnimatePresence>
+                    {showUserMenu && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 border border-gray-200"
                       >
-                        Profile
-                      </Link>
-                      <Link
-                        to="/orders"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        onClick={() => setShowUserMenu(false)}
-                      >
-                        My Orders
-                      </Link>
-                      <button
-                        onClick={handleLogout}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        <LogOut className="inline h-4 w-4 mr-2" />
-                        Logout
-                      </button>
-                    </div>
-                  )}
+                        <Link
+                          to="/profile"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={() => setShowUserMenu(false)}
+                        >
+                          Profile
+                        </Link>
+                        <Link
+                          to="/orders"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={() => setShowUserMenu(false)}
+                        >
+                          My Orders
+                        </Link>
+                        <button
+                          onClick={handleLogout}
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          <LogOut className="inline h-4 w-4 mr-2" />
+                          Logout
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </>
             ) : (

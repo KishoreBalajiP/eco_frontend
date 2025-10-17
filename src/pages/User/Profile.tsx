@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { useAuth } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
 import api from "../../services/api";
+import { motion } from "framer-motion";
 
 interface Shipping {
   shipping_name: string;
@@ -66,7 +67,12 @@ const Profile: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow p-6">
+      <motion.div
+        className="max-w-4xl mx-auto bg-white rounded-lg shadow p-6"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4 }}
+      >
         <h1 className="text-3xl font-bold mb-6">My Profile</h1>
 
         {/* User Info */}
@@ -97,100 +103,107 @@ const Profile: React.FC = () => {
             </button>
           </div>
 
-          {editing ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-              <input
-                type="text"
-                name="shipping_name"
-                value={shipping.shipping_name}
-                onChange={handleChange}
-                placeholder="Full Name"
-                className="w-full p-2 border border-gray-300 rounded"
-              />
-              <input
-                type="text"
-                name="shipping_mobile"
-                value={shipping.shipping_mobile}
-                onChange={handleChange}
-                placeholder="Mobile Number"
-                className="w-full p-2 border border-gray-300 rounded"
-              />
-              <input
-                type="text"
-                name="shipping_line1"
-                value={shipping.shipping_line1}
-                onChange={handleChange}
-                placeholder="Address Line 1"
-                className="w-full p-2 border border-gray-300 rounded"
-              />
-              <input
-                type="text"
-                name="shipping_line2"
-                value={shipping.shipping_line2}
-                onChange={handleChange}
-                placeholder="Address Line 2"
-                className="w-full p-2 border border-gray-300 rounded"
-              />
-              <input
-                type="text"
-                name="shipping_city"
-                value={shipping.shipping_city}
-                onChange={handleChange}
-                placeholder="City"
-                className="w-full p-2 border border-gray-300 rounded"
-              />
-              <input
-                type="text"
-                name="shipping_state"
-                value={shipping.shipping_state}
-                onChange={handleChange}
-                placeholder="State"
-                className="w-full p-2 border border-gray-300 rounded"
-              />
-              <input
-                type="text"
-                name="shipping_postal_code"
-                value={shipping.shipping_postal_code}
-                onChange={handleChange}
-                placeholder="Postal Code"
-                className="w-full p-2 border border-gray-300 rounded"
-              />
-              <input
-                type="text"
-                name="shipping_country"
-                value={shipping.shipping_country}
-                onChange={handleChange}
-                placeholder="Country"
-                className="w-full p-2 border border-gray-300 rounded"
-              />
-              <div className="md:col-span-2">
-                <button
-                  onClick={handleSave}
-                  disabled={loading}
-                  className="w-full mt-3 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {loading ? "Saving..." : "Save Address"}
-                </button>
+          <motion.div
+            key={editing ? "editing" : "viewing"}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4 }}
+          >
+            {editing ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                <input
+                  type="text"
+                  name="shipping_name"
+                  value={shipping.shipping_name}
+                  onChange={handleChange}
+                  placeholder="Full Name"
+                  className="w-full p-2 border border-gray-300 rounded"
+                />
+                <input
+                  type="text"
+                  name="shipping_mobile"
+                  value={shipping.shipping_mobile}
+                  onChange={handleChange}
+                  placeholder="Mobile Number"
+                  className="w-full p-2 border border-gray-300 rounded"
+                />
+                <input
+                  type="text"
+                  name="shipping_line1"
+                  value={shipping.shipping_line1}
+                  onChange={handleChange}
+                  placeholder="Address Line 1"
+                  className="w-full p-2 border border-gray-300 rounded"
+                />
+                <input
+                  type="text"
+                  name="shipping_line2"
+                  value={shipping.shipping_line2}
+                  onChange={handleChange}
+                  placeholder="Address Line 2"
+                  className="w-full p-2 border border-gray-300 rounded"
+                />
+                <input
+                  type="text"
+                  name="shipping_city"
+                  value={shipping.shipping_city}
+                  onChange={handleChange}
+                  placeholder="City"
+                  className="w-full p-2 border border-gray-300 rounded"
+                />
+                <input
+                  type="text"
+                  name="shipping_state"
+                  value={shipping.shipping_state}
+                  onChange={handleChange}
+                  placeholder="State"
+                  className="w-full p-2 border border-gray-300 rounded"
+                />
+                <input
+                  type="text"
+                  name="shipping_postal_code"
+                  value={shipping.shipping_postal_code}
+                  onChange={handleChange}
+                  placeholder="Postal Code"
+                  className="w-full p-2 border border-gray-300 rounded"
+                />
+                <input
+                  type="text"
+                  name="shipping_country"
+                  value={shipping.shipping_country}
+                  onChange={handleChange}
+                  placeholder="Country"
+                  className="w-full p-2 border border-gray-300 rounded"
+                />
+                <div className="md:col-span-2">
+                  <button
+                    onClick={handleSave}
+                    disabled={loading}
+                    className="w-full mt-3 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {loading ? "Saving..." : "Save Address"}
+                  </button>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="text-gray-700 mt-2 space-y-1">
-              {shipping.shipping_name ? (
-                <>
-                  <p>{shipping.shipping_name}</p>
-                  <p>{shipping.shipping_mobile}</p>
-                  <p>{shipping.shipping_line1}</p>
-                  {shipping.shipping_line2 && <p>{shipping.shipping_line2}</p>}
-                  <p>
-                    {shipping.shipping_city}, {shipping.shipping_state} - {shipping.shipping_postal_code}
-                  </p>
-                  <p>{shipping.shipping_country}</p>
-                </>
-              ) : (
-                <p className="text-gray-500">No shipping address added yet.</p>
-              )}
-            </div>
-          )}
+            ) : (
+              <div className="text-gray-700 mt-2 space-y-1">
+                {shipping.shipping_name ? (
+                  <>
+                    <p>{shipping.shipping_name}</p>
+                    <p>{shipping.shipping_mobile}</p>
+                    <p>{shipping.shipping_line1}</p>
+                    {shipping.shipping_line2 && <p>{shipping.shipping_line2}</p>}
+                    <p>
+                      {shipping.shipping_city}, {shipping.shipping_state} - {shipping.shipping_postal_code}
+                    </p>
+                    <p>{shipping.shipping_country}</p>
+                  </>
+                ) : (
+                  <p className="text-gray-500">No shipping address added yet.</p>
+                )}
+              </div>
+            )}
+          </motion.div>
         </div>
 
         {/* Legal Links */}
@@ -204,7 +217,7 @@ const Profile: React.FC = () => {
             Privacy Policy
           </Link>.
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 };
