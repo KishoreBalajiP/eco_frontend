@@ -10,6 +10,11 @@ import { motion } from 'framer-motion';
 
 type PaymentMethod = 'cod' | 'upi';
 
+// Extend Shipping type for API payload
+interface CreateOrderPayload extends Shipping {
+  paymentMethod: PaymentMethod;
+}
+
 const Checkout: React.FC = () => {
   const { cart, total, clearCart } = useCart();
   const navigate = useNavigate();
@@ -51,7 +56,9 @@ const Checkout: React.FC = () => {
 
     setLoading(true);
     try {
-      const response = await ordersAPI.createOrder(shipping);
+      // Create typed payload
+      const payload: CreateOrderPayload = { ...shipping, paymentMethod };
+      const response = await ordersAPI.createOrder(payload);
 
       const itemsForConfirmation: CartItem[] = cart.map(item => ({
         product_id: item.product_id,
@@ -70,7 +77,7 @@ const Checkout: React.FC = () => {
           amount: total,
         });
 
-        // Redirect in the same page
+        // Redirect in the same page to PhonePe
         document.write(res.data);
         document.close();
         return;
