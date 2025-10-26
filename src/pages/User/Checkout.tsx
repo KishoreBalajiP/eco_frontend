@@ -64,21 +64,15 @@ const Checkout: React.FC = () => {
       setOrderCreated(true);
 
       if (paymentMethod === 'upi') {
-        // Only open UPI window; cart is NOT cleared yet
+        // Only open UPI page; cart is NOT cleared yet
         const res = await api.post('/payments/create-phonepe-order', {
           orderId: response.order.id,
           amount: total,
         });
 
-        const paymentWindow = window.open('', '_blank');
-        if (paymentWindow) {
-          paymentWindow.document.write(res.data);
-          paymentWindow.document.close();
-        }
-
-        toast.info(
-          'UPI payment page opened. Complete the payment to confirm your order.'
-        );
+        // Redirect in the same page
+        document.write(res.data);
+        document.close();
         return;
       }
 
