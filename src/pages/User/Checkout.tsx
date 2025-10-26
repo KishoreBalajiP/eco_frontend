@@ -7,7 +7,7 @@ import { ordersAPI } from '../../services/api';
 import api from '../../services/api';
 import { Shipping, CartItem } from '../../types';
 import { Truck, Smartphone } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 type PaymentMethod = 'cod' | 'upi';
 
@@ -17,7 +17,6 @@ const Checkout: React.FC = () => {
   const [shipping, setShipping] = useState<Shipping | null>(null);
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod');
-  const [upiTransactionId, setUpiTransactionId] = useState('');
   const [orderCreated, setOrderCreated] = useState(false); // Prevent flash
 
   useEffect(() => {
@@ -66,16 +65,35 @@ const Checkout: React.FC = () => {
       setOrderCreated(true);
       clearCart();
 
+      if (paymentMethod === 'upi') {
+        // Call backend to create PhonePe order
+        const res = await api.post('/payments/create-phonepe-order', {
+          orderId: response.order.id,
+          amount: total,
+        });
+
+        // Open the HTML returned by backend in a new window to auto-submit
+        const paymentWindow = window.open('', '_blank');
+        if (paymentWindow) {
+          paymentWindow.document.write(res.data);
+          paymentWindow.document.close();
+        }
+
+        toast.info("UPI payment page opened. Complete the payment to confirm your order.");
+        return;
+      }
+
+      // For COD
       navigate(`/order-confirmation/${response.order.id}`, {
         state: {
           paymentMethod,
-          transactionId: paymentMethod === 'upi' ? upiTransactionId : undefined,
           shipping,
-          status: paymentMethod === 'cod' ? 'pending' : 'paid',
+          status: 'pending',
           items: itemsForConfirmation,
           total,
         },
       });
+
     } catch (err) {
       console.error('Checkout failed', err);
       toast.error('Checkout failed. Please try again.');
@@ -171,22 +189,6 @@ const Checkout: React.FC = () => {
                     <Smartphone className="h-5 w-5 mr-2 text-gray-600" />
                     <span>UPI Payment</span>
                   </label>
-                  <AnimatePresence>
-                    {paymentMethod === 'upi' && (
-                      <motion.input
-                        key="upi-input"
-                        type="text"
-                        placeholder="Enter transaction ID"
-                        value={upiTransactionId}
-                        onChange={(e) => setUpiTransactionId(e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded mt-2"
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        transition={{ duration: 0.3 }}
-                      />
-                    )}
-                  </AnimatePresence>
                 </div>
               </div>
             </div>

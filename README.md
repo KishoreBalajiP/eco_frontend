@@ -2,7 +2,6 @@
 
 This is a modern e-commerce frontend built with React, TypeScript, Vite, and Tailwind CSS. It supports user and admin roles, authentication, product browsing, cart management, order processing, and admin dashboards. Below is a detailed overview of the project structure and workflow.
 
-
 ## Project Structure
 
 ```
@@ -11,61 +10,59 @@ This is a modern e-commerce frontend built with React, TypeScript, Vite, and Tai
 │   ├── App.tsx                     # Main app component. Sets up all routes and context providers.
 │   ├── main.tsx                    # Entry point. Renders the App into the DOM.
 │   ├── index.css                   # Tailwind CSS imports and global styles.
-│   ├── vite-env.d.ts               # Vite type definitions for TypeScript.
 │   ├── components/                 # Reusable UI components
 │   │   ├── Cart/
-│   │   │   └── CartItem.tsx        # UI and logic for a single cart item (quantity, remove, etc.)
+│   │   │   └── CartItem.tsx        # UI and logic for a single cart item
 │   │   ├── Chatbot/
-│   │   │   └── Chatbot.tsx         # Floating chatbot for customer support, API integration.
+│   │   │   └── Chatbot.tsx         # Interactive customer support
 │   │   ├── Common/
-│   │   │   └── ProtectedRoute.tsx  # Wrapper for protecting routes by auth/role.
+│   │   │   └── ProtectedRoute.tsx  # Route protection by auth/role
 │   │   ├── Layout/
-│   │   │   ├── AdminSidebar.tsx    # Sidebar navigation for admin dashboard.
-│   │   │   └── Navbar.tsx          # Top navigation bar with search, cart, user menu.
+│   │   │   ├── AdminSidebar.tsx    # Admin navigation sidebar
+│   │   │   ├── Footer.tsx          # Shared footer component
+│   │   │   └── Navbar.tsx          # Main navigation header
 │   │   └── Products/
-│   │       ├── ProductCard.tsx     # Card UI for a single product (image, price, add to cart).
-│   │       └── ProductGrid.tsx     # Grid layout for displaying multiple products.
-│   ├── context/                    # React context providers for global state
-│   │   ├── AuthContext.tsx         # Authentication state, login/register/logout logic.
-│   │   └── CartContext.tsx         # Cart state, add/remove/update/clear cart logic.
-│   ├── pages/                      # All main pages (routed views)
+│   │       └── ProductGrid.tsx     # Grid layout for products
+│   ├── context/
+│   │   ├── AuthContext.tsx         # Authentication state management
+│   │   └── CartContext.tsx         # Shopping cart state
+│   ├── pages/
 │   │   ├── Admin/
-│   │   │   ├── Dashboard.tsx           # Admin dashboard: stats for products, orders, users, revenue.
-│   │   │   ├── OrdersManagement.tsx    # Admin: view and update all orders, change status.
-│   │   │   ├── ProductsManagement.tsx  # Admin: add/edit/delete products, image upload.
-│   │   │   └── UsersManagement.tsx     # Admin: view users, assign roles.
+│   │   │   ├── Dashboard.tsx       # Admin statistics
+│   │   │   ├── OrdersManagement.tsx
+│   │   │   ├── ProductsManagement.tsx
+│   │   │   └── UsersManagement.tsx
 │   │   ├── Auth/
-│   │   │   ├── ForgotPassword.tsx      # Start password reset, send OTP to email.
-│   │   │   ├── Login.tsx               # User login form.
-│   │   │   ├── Register.tsx            # User registration form.
-│   │   │   ├── ResetPassword.tsx       # Set new password after OTP verification.
-│   │   │   └── VerifyOtp.tsx           # Enter OTP sent to email for password reset.
+│   │   │   ├── ForgotPassword.tsx
+│   │   │   ├── Login.tsx
+│   │   │   ├── Register.tsx
+│   │   │   └── VerifyRegistrationOtp.tsx
+│   │   ├── Legal/
+│   │   │   ├── ContactUs.tsx
+│   │   │   ├── PrivacyPolicy.tsx
+│   │   │   ├── RefundPolicy.tsx
+│   │   │   ├── ShippingPolicy.tsx
+│   │   │   └── TermsAndConditions.tsx
 │   │   └── User/
-│   │       ├── Cart.tsx                # User's shopping cart page.
-│   │       ├── Checkout.tsx            # Checkout form, payment method selection.
-│   │       ├── Home.tsx                # Home page, product listing and search.
-│   │       ├── OrderConfirmation.tsx   # Order confirmation and summary after checkout.
-│   │       ├── Orders.tsx              # User's order history and status.
-│   │       ├── ProductDetails.tsx      # Detailed view of a single product.
-│   │       └── Profile.tsx             # User profile, view and edit shipping address.
+│   │       ├── Cart.tsx
+│   │       ├── Checkout.tsx
+│   │       ├── Home.tsx
+│   │       ├── OrderConfirmation.tsx
+│   │       ├── Orders.tsx
+│   │       ├── ProductDetails.tsx
+│   │       └── Profile.tsx
 │   ├── services/
-│   │   └── api.ts                  # All API calls (auth, products, cart, orders, admin, chatbot). Uses Axios.
+│   │   └── api.ts                  # API integration with Axios
 │   └── types/
-│       └── index.ts                # TypeScript interfaces for all data models (User, Product, Order, etc.)
-├── package.json                    # Project dependencies, scripts, and metadata.
-├── tailwind.config.js              # Tailwind CSS configuration.
-├── postcss.config.js               # PostCSS configuration for Tailwind and autoprefixer.
-├── vite.config.ts                  # Vite build and dev server configuration.
-├── tsconfig.json                   # Base TypeScript configuration.
-├── tsconfig.app.json               # TypeScript config for app source files.
-├── tsconfig.node.json              # TypeScript config for node scripts/configs.
-├── eslint.config.js                # ESLint configuration for linting code.
-├── index.html                      # Main HTML entry point for the app.
-└── .gitignore                      # Files and folders to ignore in git.
+│       └── index.ts                # TypeScript interfaces
+├── .env                           # Environment variables
+├── eslint.config.js               # ESLint configuration
+├── postcss.config.js              # PostCSS setup
+├── tailwind.config.js             # Tailwind CSS configuration
+├── tsconfig.json                  # TypeScript configuration
+├── vite.config.ts                 # Vite configuration
+└── index.html                     # HTML entry point
 ```
-
-## Main Features & Workflow
-
 
 ## Main Features & Workflow
 
