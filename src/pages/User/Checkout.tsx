@@ -1,4 +1,3 @@
-// src/pages/User/Checkout.tsx
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
@@ -17,7 +16,7 @@ const Checkout: React.FC = () => {
   const [shipping, setShipping] = useState<Shipping | null>(null);
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod');
-  const [orderCreated, setOrderCreated] = useState(false); // Prevent flash
+  const [orderCreated, setOrderCreated] = useState(false);
 
   useEffect(() => {
     const fetchShipping = async () => {
@@ -65,24 +64,25 @@ const Checkout: React.FC = () => {
       setOrderCreated(true);
 
       if (paymentMethod === 'upi') {
-        // Call backend to create PhonePe order
+        // Only open UPI window; cart is NOT cleared yet
         const res = await api.post('/payments/create-phonepe-order', {
           orderId: response.order.id,
           amount: total,
         });
 
-        // Open the HTML returned by backend in a new window to auto-submit
         const paymentWindow = window.open('', '_blank');
         if (paymentWindow) {
           paymentWindow.document.write(res.data);
           paymentWindow.document.close();
         }
 
-        toast.info("UPI payment page opened. Complete the payment to confirm your order.");
+        toast.info(
+          'UPI payment page opened. Complete the payment to confirm your order.'
+        );
         return;
       }
 
-      // For COD, clear cart after order creation
+      // COD: clear cart immediately after order creation
       clearCart();
 
       navigate(`/order-confirmation/${response.order.id}`, {
@@ -94,7 +94,6 @@ const Checkout: React.FC = () => {
           total,
         },
       });
-
     } catch (err) {
       console.error('Checkout failed', err);
       toast.error('Checkout failed. Please try again.');
@@ -125,9 +124,11 @@ const Checkout: React.FC = () => {
           >
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h2>
             <div className="space-y-3 mb-4">
-              {cart.map((item) => (
+              {cart.map(item => (
                 <div key={item.product_id} className="flex justify-between text-sm">
-                  <span>{item.name} × {item.quantity}</span>
+                  <span>
+                    {item.name} × {item.quantity}
+                  </span>
                   <span>₹{item.price * item.quantity}</span>
                 </div>
               ))}
@@ -152,7 +153,8 @@ const Checkout: React.FC = () => {
               <p>{shipping.shipping_mobile}</p>
               <p>
                 {shipping.shipping_line1}
-                {shipping.shipping_line2 ? `, ${shipping.shipping_line2}` : ''}, {shipping.shipping_city}, {shipping.shipping_state}, {shipping.shipping_postal_code}, {shipping.shipping_country}
+                {shipping.shipping_line2 ? `, ${shipping.shipping_line2}` : ''}, {shipping.shipping_city},{' '}
+                {shipping.shipping_state}, {shipping.shipping_postal_code}, {shipping.shipping_country}
               </p>
             </div>
 
@@ -160,7 +162,6 @@ const Checkout: React.FC = () => {
             <div>
               <h2 className="text-lg font-semibold text-gray-900 mb-2">Payment Method</h2>
               <div className="space-y-4">
-                {/* Cash on Delivery */}
                 <div className="border rounded-lg p-3">
                   <label className="flex items-center cursor-pointer">
                     <input
@@ -168,7 +169,7 @@ const Checkout: React.FC = () => {
                       name="payment"
                       value="cod"
                       checked={paymentMethod === 'cod'}
-                      onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                      onChange={e => setPaymentMethod(e.target.value as PaymentMethod)}
                       className="mr-3"
                     />
                     <Truck className="h-5 w-5 mr-2 text-gray-600" />
@@ -176,7 +177,6 @@ const Checkout: React.FC = () => {
                   </label>
                 </div>
 
-                {/* UPI */}
                 <div className="border rounded-lg p-3">
                   <label className="flex items-center cursor-pointer">
                     <input
@@ -184,7 +184,7 @@ const Checkout: React.FC = () => {
                       name="payment"
                       value="upi"
                       checked={paymentMethod === 'upi'}
-                      onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                      onChange={e => setPaymentMethod(e.target.value as PaymentMethod)}
                       className="mr-3"
                     />
                     <Smartphone className="h-5 w-5 mr-2 text-gray-600" />
