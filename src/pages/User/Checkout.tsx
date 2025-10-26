@@ -63,7 +63,6 @@ const Checkout: React.FC = () => {
       }));
 
       setOrderCreated(true);
-      clearCart();
 
       if (paymentMethod === 'upi') {
         // Call backend to create PhonePe order
@@ -83,7 +82,9 @@ const Checkout: React.FC = () => {
         return;
       }
 
-      // For COD
+      // For COD, clear cart after order creation
+      clearCart();
+
       navigate(`/order-confirmation/${response.order.id}`, {
         state: {
           paymentMethod,
