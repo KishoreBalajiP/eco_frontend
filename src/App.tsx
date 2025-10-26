@@ -27,6 +27,7 @@ import Checkout from "./pages/User/Checkout";
 import OrderConfirmation from "./pages/User/OrderConfirmation";
 import Orders from "./pages/User/Orders";
 import Profile from "./pages/User/Profile";
+import PaymentCallback from "./pages/User/PaymentCallback"; // <-- NEW
 
 // Admin Pages
 import Dashboard from "./pages/Admin/Dashboard";
@@ -186,6 +187,18 @@ const AppContent: React.FC = () => {
                 <Route path="/order-confirmation/:orderId" element={<ProtectedRoute><motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><OrderConfirmation /></motion.div></ProtectedRoute>} />
                 <Route path="/orders" element={<ProtectedRoute><motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Orders /></motion.div></ProtectedRoute>} />
                 <Route path="/profile" element={<ProtectedRoute><motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Profile /></motion.div></ProtectedRoute>} />
+
+                {/* NEW: Payment Callback */}
+                <Route
+                  path="/payment-callback"
+                  element={
+                    <ProtectedRoute>
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                        <PaymentCallback />
+                      </motion.div>
+                    </ProtectedRoute>
+                  }
+                />
 
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
