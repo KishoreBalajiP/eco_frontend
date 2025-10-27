@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { ordersAPI, paymentsAPI } from '../../services/api';
 import { Shipping, CartItem } from '../../types';
-import { Truck, Smartphone, CheckCircle } from 'lucide-react';
+import { Truck, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 // --- ✅ Extend Window type for PhonePeCheckout ---
@@ -105,7 +105,8 @@ const Checkout: React.FC = () => {
         image_url: item.image_url,
       }));
 
-      // 2️⃣ Handle UPI (PhonePe)
+      // 2️⃣ Handle UPI (PhonePe) — temporarily disabled
+      /*
       if (paymentMethod === 'upi') {
         const res = await paymentsAPI.createPhonePeOrder(order.id, total);
 
@@ -128,6 +129,7 @@ const Checkout: React.FC = () => {
         toast.error('PhonePe payment could not be started.');
         return;
       }
+      */
 
       // 3️⃣ COD flow (unchanged)
       clearCart();
@@ -212,6 +214,7 @@ const Checkout: React.FC = () => {
                 Select Payment Method
               </h2>
               <div className="space-y-4">
+                {/* COD Option */}
                 <div
                   className={`border rounded-lg p-3 cursor-pointer flex items-center ${
                     paymentMethod === 'cod'
@@ -224,6 +227,7 @@ const Checkout: React.FC = () => {
                   Cash on Delivery
                 </div>
 
+                {/* --- UPI OPTION HIDDEN (code retained for later) ---
                 <div
                   className={`border rounded-lg p-3 cursor-pointer flex items-center ${
                     paymentMethod === 'upi'
@@ -235,6 +239,7 @@ const Checkout: React.FC = () => {
                   <Smartphone className="h-5 w-5 mr-2 text-gray-600" />
                   Pay via PhonePe (UPI)
                 </div>
+                */}
               </div>
             </div>
 
