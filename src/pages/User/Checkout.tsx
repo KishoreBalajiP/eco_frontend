@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { ordersAPI, paymentsAPI } from '../../services/api';
 import { Shipping, CartItem } from '../../types';
-import { Truck, Smartphone } from 'lucide-react';
+import { Truck, Smartphone, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 type PaymentMethod = 'cod' | 'upi';
@@ -13,12 +13,13 @@ const Checkout: React.FC = () => {
   const { cart, total, clearCart } = useCart();
   const navigate = useNavigate();
   const [shipping, setShipping] = useState<Shipping | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchShipping = async () => {
       try {
-        const res = await ordersAPI.getOrders(); // Fetch latest user orders
+        const res = await ordersAPI.getOrders();
         const latestOrder = res.orders?.[0];
         if (!latestOrder) {
           toast.warn('Please add your shipping address first.');
@@ -60,12 +61,16 @@ const Checkout: React.FC = () => {
     fetchShipping();
   }, [navigate]);
 
-  const handleCheckout = async (paymentMethod: PaymentMethod) => {
-    if (!shipping || cart.length === 0) return;
+  const handleCompleteOrder = async () => {
+    if (!shipping) return toast.error('Missing shipping info.');
+    if (!paymentMethod) return toast.error('Please select a payment method.');
+    if (cart.length === 0) return toast.error('Your cart is empty.');
 
     setLoading(true);
     try {
+      // 1️⃣ Create order in backend
       const response = await ordersAPI.createOrder(shipping, paymentMethod);
+      const order = response.order;
 
       const itemsForConfirmation: CartItem[] = cart.map(item => ({
         product_id: item.product_id,
@@ -75,18 +80,18 @@ const Checkout: React.FC = () => {
         image_url: item.image_url,
       }));
 
+      // 2️⃣ Handle UPI (PhonePe redirect)
       if (paymentMethod === 'upi') {
-        // Redirect to PhonePe payment
-        const res = await paymentsAPI.createPhonePeOrder(response.order.id, total);
-        document.write(res); // Backend sends HTML form for automatic redirect
+        const res = await paymentsAPI.createPhonePeOrder(order.id, total);
+        document.write(res); // HTML form redirect
         document.close();
         return;
       }
 
-      // COD: clear cart immediately and redirect to confirmation
+      // 3️⃣ COD flow
       clearCart();
-
-      navigate(`/order-confirmation/${response.order.id}`, {
+      toast.success('Order placed successfully!');
+      navigate(`/order-confirmation/${order.id}`, {
         state: {
           paymentMethod,
           shipping,
@@ -113,7 +118,7 @@ const Checkout: React.FC = () => {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.4 }}
       >
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Checkout</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-6 text-center">Checkout</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Order Summary */}
@@ -140,7 +145,7 @@ const Checkout: React.FC = () => {
             </div>
           </motion.div>
 
-          {/* Payment & Shipping */}
+          {/* Shipping & Payment */}
           <motion.div
             className="bg-white rounded-lg shadow p-6 space-y-6"
             initial={{ opacity: 0, scale: 0.95 }}
@@ -159,36 +164,47 @@ const Checkout: React.FC = () => {
               </p>
             </div>
 
-            {/* Payment Methods */}
+            {/* Payment Selection (only selects, doesn’t trigger order) */}
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">Payment Method</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-2">Select Payment Method</h2>
               <div className="space-y-4">
-                <div className="border rounded-lg p-3">
-                  <button
-                    className="flex items-center w-full cursor-pointer"
-                    onClick={() => handleCheckout('cod')}
-                    disabled={loading}
-                  >
-                    <Truck className="h-5 w-5 mr-2 text-gray-600" />
-                    Cash on Delivery
-                  </button>
+                <div
+                  className={`border rounded-lg p-3 cursor-pointer flex items-center ${
+                    paymentMethod === 'cod' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+                  }`}
+                  onClick={() => setPaymentMethod('cod')}
+                >
+                  <Truck className="h-5 w-5 mr-2 text-gray-600" />
+                  Cash on Delivery
                 </div>
 
-                <div className="border rounded-lg p-3">
-                  <button
-                    className="flex items-center w-full cursor-pointer"
-                    onClick={() => handleCheckout('upi')}
-                    disabled={loading}
-                  >
-                    <Smartphone className="h-5 w-5 mr-2 text-gray-600" />
-                    UPI Payment
-                  </button>
+                <div
+                  className={`border rounded-lg p-3 cursor-pointer flex items-center ${
+                    paymentMethod === 'upi' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+                  }`}
+                  onClick={() => setPaymentMethod('upi')}
+                >
+                  <Smartphone className="h-5 w-5 mr-2 text-gray-600" />
+                  Pay via PhonePe (UPI)
                 </div>
               </div>
             </div>
 
-            {/* Policy Notice */}
-            <p className="text-xs text-gray-600 mt-2">
+            {/* Complete Order Button */}
+            <button
+              onClick={handleCompleteOrder}
+              disabled={loading || !paymentMethod}
+              className={`w-full py-3 flex items-center justify-center gap-2 rounded-lg text-white font-semibold ${
+                loading || !paymentMethod
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-blue-600 hover:bg-blue-700'
+              }`}
+            >
+              <CheckCircle className="h-5 w-5" />
+              {loading ? 'Processing...' : 'Complete Order'}
+            </button>
+
+            <p className="text-xs text-gray-600 mt-2 text-center">
               By placing your order, you agree to our{' '}
               <a href="/terms-and-conditions" target="_blank" className="underline">
                 Terms & Conditions
