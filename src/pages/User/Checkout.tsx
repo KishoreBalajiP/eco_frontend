@@ -7,6 +7,20 @@ import { Shipping, CartItem } from '../../types';
 import { Truck, Smartphone, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+// --- ✅ Extend Window type for PhonePeCheckout ---
+declare global {
+  interface Window {
+    PhonePeCheckout?: {
+      transact: (options: {
+        tokenUrl: string;
+        callback?: (response: string) => void;
+        type?: 'IFRAME' | 'REDIRECT';
+      }) => void;
+      closePage?: () => void;
+    };
+  }
+}
+
 type PaymentMethod = 'cod' | 'upi';
 
 const Checkout: React.FC = () => {
@@ -61,6 +75,17 @@ const Checkout: React.FC = () => {
     fetchShipping();
   }, [navigate]);
 
+  // --- ✅ Optional IFrame-based callback (kept for future) ---
+  const phonePeCallback = (response: string) => {
+    if (response === 'USER_CANCEL') {
+      toast.info('Payment cancelled by user.');
+      return;
+    } else if (response === 'CONCLUDED') {
+      toast.success('Payment completed.');
+      navigate('/orders');
+    }
+  };
+
   const handleCompleteOrder = async () => {
     if (!shipping) return toast.error('Missing shipping info.');
     if (!paymentMethod) return toast.error('Please select a payment method.');
@@ -80,15 +105,31 @@ const Checkout: React.FC = () => {
         image_url: item.image_url,
       }));
 
-      // 2️⃣ Handle UPI (PhonePe redirect)
+      // 2️⃣ Handle UPI (PhonePe)
       if (paymentMethod === 'upi') {
         const res = await paymentsAPI.createPhonePeOrder(order.id, total);
-        document.write(res); // HTML form redirect
-        document.close();
+
+        // --- ✅ Prefer redirectUrl for official sandbox ---
+        if (res.redirectUrl) {
+          window.location.href = res.redirectUrl; // redirect to PhonePe Pay Page
+          return;
+        }
+
+        // --- ✅ Fallback for IFRAME SDK if used later ---
+        if (res.tokenUrl && window.PhonePeCheckout?.transact) {
+          window.PhonePeCheckout.transact({
+            tokenUrl: res.tokenUrl,
+            type: 'IFRAME',
+            callback: phonePeCallback,
+          });
+          return;
+        }
+
+        toast.error('PhonePe payment could not be started.');
         return;
       }
 
-      // 3️⃣ COD flow
+      // 3️⃣ COD flow (unchanged)
       clearCart();
       toast.success('Order placed successfully!');
       navigate(`/order-confirmation/${order.id}`, {
@@ -159,18 +200,23 @@ const Checkout: React.FC = () => {
               <p>{shipping.shipping_mobile}</p>
               <p>
                 {shipping.shipping_line1}
-                {shipping.shipping_line2 ? `, ${shipping.shipping_line2}` : ''}, {shipping.shipping_city},{' '}
-                {shipping.shipping_state}, {shipping.shipping_postal_code}, {shipping.shipping_country}
+                {shipping.shipping_line2 ? `, ${shipping.shipping_line2}` : ''},{' '}
+                {shipping.shipping_city}, {shipping.shipping_state},{' '}
+                {shipping.shipping_postal_code}, {shipping.shipping_country}
               </p>
             </div>
 
-            {/* Payment Selection (only selects, doesn’t trigger order) */}
+            {/* Payment Selection */}
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">Select Payment Method</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-2">
+                Select Payment Method
+              </h2>
               <div className="space-y-4">
                 <div
                   className={`border rounded-lg p-3 cursor-pointer flex items-center ${
-                    paymentMethod === 'cod' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+                    paymentMethod === 'cod'
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200'
                   }`}
                   onClick={() => setPaymentMethod('cod')}
                 >
@@ -180,7 +226,9 @@ const Checkout: React.FC = () => {
 
                 <div
                   className={`border rounded-lg p-3 cursor-pointer flex items-center ${
-                    paymentMethod === 'upi' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+                    paymentMethod === 'upi'
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200'
                   }`}
                   onClick={() => setPaymentMethod('upi')}
                 >
