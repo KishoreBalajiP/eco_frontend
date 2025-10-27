@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
-import { ordersAPI } from '../../services/api';
-import api from '../../services/api';
+import { ordersAPI, paymentsAPI } from '../../services/api';
 import { Shipping, CartItem } from '../../types';
 import { Truck, Smartphone } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -15,26 +14,41 @@ const Checkout: React.FC = () => {
   const navigate = useNavigate();
   const [shipping, setShipping] = useState<Shipping | null>(null);
   const [loading, setLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod');
-  const [orderCreated, setOrderCreated] = useState(false);
 
   useEffect(() => {
     const fetchShipping = async () => {
       try {
-        const { data } = await api.get('/users/me/shipping');
+        const res = await ordersAPI.getOrders(); // Fetch latest user orders
+        const latestOrder = res.orders?.[0];
+        if (!latestOrder) {
+          toast.warn('Please add your shipping address first.');
+          return navigate('/profile');
+        }
+
+        const shippingInfo: Shipping = {
+          shipping_name: latestOrder.shipping_name,
+          shipping_mobile: latestOrder.shipping_mobile,
+          shipping_line1: latestOrder.shipping_line1,
+          shipping_line2: latestOrder.shipping_line2,
+          shipping_city: latestOrder.shipping_city,
+          shipping_state: latestOrder.shipping_state,
+          shipping_postal_code: latestOrder.shipping_postal_code,
+          shipping_country: latestOrder.shipping_country,
+        };
+
         if (
-          !data.shipping_name ||
-          !data.shipping_mobile ||
-          !data.shipping_line1 ||
-          !data.shipping_city ||
-          !data.shipping_state ||
-          !data.shipping_postal_code ||
-          !data.shipping_country
+          !shippingInfo.shipping_name ||
+          !shippingInfo.shipping_mobile ||
+          !shippingInfo.shipping_line1 ||
+          !shippingInfo.shipping_city ||
+          !shippingInfo.shipping_state ||
+          !shippingInfo.shipping_postal_code ||
+          !shippingInfo.shipping_country
         ) {
           toast.warn('Please add your shipping address first.');
           navigate('/profile');
         } else {
-          setShipping(data);
+          setShipping(shippingInfo);
         }
       } catch (err) {
         console.error('Failed to fetch shipping info', err);
@@ -46,14 +60,12 @@ const Checkout: React.FC = () => {
     fetchShipping();
   }, [navigate]);
 
-  const handleCheckout = async () => {
+  const handleCheckout = async (paymentMethod: PaymentMethod) => {
     if (!shipping || cart.length === 0) return;
 
     setLoading(true);
     try {
-      // <-- Flatten shipping properties and add paymentMethod
-      const payload = { ...shipping, paymentMethod };
-      const response = await ordersAPI.createOrder(payload);
+      const response = await ordersAPI.createOrder(shipping, paymentMethod);
 
       const itemsForConfirmation: CartItem[] = cart.map(item => ({
         product_id: item.product_id,
@@ -63,22 +75,15 @@ const Checkout: React.FC = () => {
         image_url: item.image_url,
       }));
 
-      setOrderCreated(true);
-
       if (paymentMethod === 'upi') {
-        // Only open UPI page; cart is NOT cleared yet
-        const res = await api.post('/payments/create-phonepe-order', {
-          orderId: response.order.id,
-          amount: total,
-        });
-
-        // Redirect in same page
-        document.write(res.data);
+        // Redirect to PhonePe payment
+        const res = await paymentsAPI.createPhonePeOrder(response.order.id, total);
+        document.write(res); // Backend sends HTML form for automatic redirect
         document.close();
         return;
       }
 
-      // COD: clear cart immediately after order creation
+      // COD: clear cart immediately and redirect to confirmation
       clearCart();
 
       navigate(`/order-confirmation/${response.order.id}`, {
@@ -98,7 +103,7 @@ const Checkout: React.FC = () => {
     }
   };
 
-  if (!shipping || orderCreated) return null;
+  if (!shipping) return null;
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -159,33 +164,25 @@ const Checkout: React.FC = () => {
               <h2 className="text-lg font-semibold text-gray-900 mb-2">Payment Method</h2>
               <div className="space-y-4">
                 <div className="border rounded-lg p-3">
-                  <label className="flex items-center cursor-pointer">
-                    <input
-                      type="radio"
-                      name="payment"
-                      value="cod"
-                      checked={paymentMethod === 'cod'}
-                      onChange={e => setPaymentMethod(e.target.value as PaymentMethod)}
-                      className="mr-3"
-                    />
+                  <button
+                    className="flex items-center w-full cursor-pointer"
+                    onClick={() => handleCheckout('cod')}
+                    disabled={loading}
+                  >
                     <Truck className="h-5 w-5 mr-2 text-gray-600" />
-                    <span>Cash on Delivery</span>
-                  </label>
+                    Cash on Delivery
+                  </button>
                 </div>
 
                 <div className="border rounded-lg p-3">
-                  <label className="flex items-center cursor-pointer">
-                    <input
-                      type="radio"
-                      name="payment"
-                      value="upi"
-                      checked={paymentMethod === 'upi'}
-                      onChange={e => setPaymentMethod(e.target.value as PaymentMethod)}
-                      className="mr-3"
-                    />
+                  <button
+                    className="flex items-center w-full cursor-pointer"
+                    onClick={() => handleCheckout('upi')}
+                    disabled={loading}
+                  >
                     <Smartphone className="h-5 w-5 mr-2 text-gray-600" />
-                    <span>UPI Payment</span>
-                  </label>
+                    UPI Payment
+                  </button>
                 </div>
               </div>
             </div>
@@ -201,14 +198,6 @@ const Checkout: React.FC = () => {
                 Privacy Policy
               </a>.
             </p>
-
-            <button
-              onClick={handleCheckout}
-              disabled={loading || cart.length === 0}
-              className="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 disabled:opacity-50"
-            >
-              {loading ? 'Processing...' : 'Complete Order'}
-            </button>
           </motion.div>
         </div>
       </motion.div>

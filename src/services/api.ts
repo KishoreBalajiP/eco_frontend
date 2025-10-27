@@ -111,7 +111,7 @@ export const cartAPI = {
 
 // -------------------- Orders APIs --------------------
 export const ordersAPI = {
-  createOrder: async (shipping: Shipping, currency = "INR") => {
+  createOrder: async (shipping: Shipping, paymentMethod: 'cod' | 'upi', currency = "INR") => {
     // Flatten shipping fields for backend
     const payload = {
       shipping_name: shipping.shipping_name,
@@ -123,6 +123,7 @@ export const ordersAPI = {
       shipping_postal_code: shipping.shipping_postal_code,
       shipping_country: shipping.shipping_country,
       currency,
+      paymentMethod,
     };
 
     const response = await api.post("/orders", payload);
@@ -147,9 +148,16 @@ export const ordersAPI = {
 
 // -------------------- Payments APIs --------------------
 export const paymentsAPI = {
+  // Generic create order (optional)
   createOrder: async (amount: number, currency = "INR", receipt: string) => {
     const response = await api.post("/payments/create-order", { amount, currency, receipt });
     return response.data;
+  },
+
+  // PhonePe / UPI payment
+  createPhonePeOrder: async (orderId: number, amount: number) => {
+    const response = await api.post("/payments/create-phonepe-order", { orderId, amount });
+    return response.data; // HTML form string
   },
 };
 

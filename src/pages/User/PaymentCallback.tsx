@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
-import axios from "../../services/api";
+import { ordersAPI } from "../../services/api";
 
 const PaymentCallback: React.FC = () => {
   const navigate = useNavigate();
@@ -10,7 +10,6 @@ const PaymentCallback: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Wrap async code inside a function
     const verifyPayment = async () => {
       const query = new URLSearchParams(location.search);
       const orderId = query.get("orderId");
@@ -22,8 +21,9 @@ const PaymentCallback: React.FC = () => {
       }
 
       try {
-        const res = await axios.get(`/orders/${orderId}`);
-        const order = res.data.order;
+        // Fetch the order from backend
+        const res = await ordersAPI.getOrder(Number(orderId));
+        const order = res.order;
 
         if (!order) {
           toast.error("Order not found");
@@ -33,7 +33,9 @@ const PaymentCallback: React.FC = () => {
         switch (order.status) {
           case "paid":
             toast.success("Payment successful!");
-            navigate(`/order-confirmation/${orderId}`);
+            navigate(`/order-confirmation/${orderId}`, {
+              state: { paymentMethod: "upi" },
+            });
             break;
           case "failed":
             toast.error("Payment failed. Please try again.");
