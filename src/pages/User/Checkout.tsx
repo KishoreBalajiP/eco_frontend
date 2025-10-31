@@ -6,6 +6,7 @@ import { ordersAPI, paymentsAPI } from '../../services/api';
 import { Shipping, CartItem } from '../../types';
 import { Truck, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import api from '../../services/api';
 
 // --- ✅ Extend Window type for PhonePeCheckout ---
 declare global {
@@ -33,22 +34,18 @@ const Checkout: React.FC = () => {
   useEffect(() => {
     const fetchShipping = async () => {
       try {
-        const res = await ordersAPI.getOrders();
-        const latestOrder = res.orders?.[0];
-        if (!latestOrder) {
-          toast.warn('Please add your shipping address first.');
-          return navigate('/profile');
-        }
+        // ✅ FIX: Get current user's shipping info instead of order history
+        const { data } = await api.get("/users/me/shipping");
 
         const shippingInfo: Shipping = {
-          shipping_name: latestOrder.shipping_name,
-          shipping_mobile: latestOrder.shipping_mobile,
-          shipping_line1: latestOrder.shipping_line1,
-          shipping_line2: latestOrder.shipping_line2,
-          shipping_city: latestOrder.shipping_city,
-          shipping_state: latestOrder.shipping_state,
-          shipping_postal_code: latestOrder.shipping_postal_code,
-          shipping_country: latestOrder.shipping_country,
+          shipping_name: data.shipping_name,
+          shipping_mobile: data.shipping_mobile,
+          shipping_line1: data.shipping_line1,
+          shipping_line2: data.shipping_line2,
+          shipping_city: data.shipping_city,
+          shipping_state: data.shipping_state,
+          shipping_postal_code: data.shipping_postal_code,
+          shipping_country: data.shipping_country,
         };
 
         if (
