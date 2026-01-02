@@ -9,7 +9,7 @@ export default function Footer() {
     >
       <div className="max-w-7xl mx-auto px-4 py-2.5 flex flex-col md:flex-row justify-between items-center text-sm">
         <div className="mb-1 md:mb-0 text-center md:text-left">
-          &copy; 2025 Jaya Stores. All rights reserved.
+          &copy; {new Date().getFullYear()} Jaya Stores. All rights reserved.
         </div>
 
         <div className="flex flex-wrap justify-center md:justify-end space-x-4">
